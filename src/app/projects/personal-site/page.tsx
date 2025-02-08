@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowUpRight } from 'lucide-react';
 
@@ -29,7 +28,7 @@ export default function PersonalSite() {
           <div className="prose dark:prose-invert">
             <p className="text-[15px] text-gray-700 dark:text-gray-300 leading-relaxed">
               This personal website serves as a digital garden for my projects, writing, and online presence. 
-              Inspired by Brian Lovin's clean and functional design, I built this site to showcase my work 
+              Inspired by Brian Lovin&apos;s clean and functional design, I built this site to showcase my work 
               and share my thoughts on software development, design, and technology.
             </p>
           </div>

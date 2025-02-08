@@ -48,7 +48,7 @@ export default function BlogPost() {
         <h2 className="text-xl font-normal mt-12 mb-4">Dark Mode Implementation</h2>
         <p className="text-[15px] text-gray-700 dark:text-gray-300 leading-relaxed mb-6">
           One of the key features I wanted to implement was a seamless dark mode experience. 
-          Using Tailwind's dark mode support and system preference detection, I was able to 
+          Using Tailwind&apos;s dark mode support and system preference detection, I was able to 
           create a solution that:
         </p>
 
@@ -80,7 +80,7 @@ export default function BlogPost() {
             Minimal JavaScript with selective hydration
           </li>
           <li className="text-[15px] text-gray-700 dark:text-gray-300">
-            Efficient styling with Tailwind's JIT compiler
+            Efficient styling with Tailwind&apos;s JIT compiler
           </li>
         </ul>
 

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { HomeIcon, BookOpenIcon, UserIcon, DocumentTextIcon, BeakerIcon, CommandLineIcon, ShieldCheckIcon, CubeIcon, CodeBracketIcon } from '@heroicons/react/24/outline';
+import { HomeIcon, BookOpenIcon, UserIcon, DocumentTextIcon, BeakerIcon, ShieldCheckIcon, CubeIcon, CodeBracketIcon } from '@heroicons/react/24/outline';
 import { ExternalLink, Twitter, Linkedin, Github } from 'lucide-react';
 
 const navItems = [

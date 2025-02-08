@@ -26,7 +26,7 @@ export default function Home() {
       </div>
 
       <section className="mb-16">
-        <h2 className="text-xl font-normal mb-4">What I'm Working On</h2>
+        <h2 className="text-xl font-normal mb-4">What I&apos;m Working On</h2>
         <ul className="space-y-3">
           <li className="text-[15px] text-gray-700 dark:text-gray-300">
             Building this personal website with Next.js
