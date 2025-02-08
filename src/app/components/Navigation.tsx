@@ -41,10 +41,31 @@ const onlineSection = [
   },
 ];
 
+interface NavLinkProps {
+  item: {
+    name: string;
+    path?: string;
+    href?: string;
+    icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  };
+  isExternal?: boolean;
+}
+
+interface NavSectionProps {
+  title: string;
+  items: Array<{
+    name: string;
+    path?: string;
+    href?: string;
+    icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  }>;
+  isExternal?: boolean;
+}
+
 export default function Navigation() {
   const pathname = usePathname();
 
-  const NavLink = ({ item, isExternal = false }: { item: { name: string; path?: string; href?: string; icon?: any }, isExternal?: boolean }) => {
+  const NavLink = ({ item, isExternal = false }: NavLinkProps) => {
     const isActive = item.path === '/writing' 
       ? pathname.startsWith('/writing')
       : pathname === item.path;
@@ -86,7 +107,7 @@ export default function Navigation() {
     );
   };
 
-  const NavSection = ({ title, items, isExternal = false }: { title: string, items: any[], isExternal?: boolean }) => (
+  const NavSection = ({ title, items, isExternal = false }: NavSectionProps) => (
     <div>
       <h3 className="mb-2 text-[11px] font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider">
         {title}

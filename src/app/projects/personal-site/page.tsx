@@ -9,7 +9,7 @@ export default function PersonalSite() {
         <header className="mb-8">
           <h1 className="text-2xl font-normal mb-3">Personal Site</h1>
           <p className="text-base text-gray-700 dark:text-gray-300 mb-6">
-            A modern, minimalist personal website inspired by Brian Lovin's design, built with Next.js and Tailwind CSS.
+            A modern, minimalist personal website inspired by Brian Lovin&apos;s design, built with Next.js and Tailwind CSS.
           </p>
           <div className="flex items-center space-x-4">
             <Link 

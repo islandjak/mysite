@@ -19,9 +19,9 @@ export default function Home() {
   return (
     <div className="max-w-2xl mx-auto py-16 px-12">
       <div className="mb-16">
-        <h1 className="text-2xl font-normal mb-3">Hey, I'm Jack</h1>
-        <p className="text-base text-gray-700 dark:text-gray-300">
-          I'm a software engineer, writer, and creator. I build things for the web and share what I learn along the way.
+        <h1 className="text-2xl font-normal mb-3">Hey, I&apos;m Jack</h1>
+        <p className="text-[15px] text-gray-700 dark:text-gray-300">
+          I&apos;m a software engineer, writer, and creator. I build things for the web and share what I learn along the way.
         </p>
       </div>
 

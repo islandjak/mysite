@@ -12,7 +12,7 @@ export default function BlogPost() {
         <p className="text-[15px] text-gray-700 dark:text-gray-300 leading-relaxed mb-6">
           When I decided to rebuild my personal website, I wanted to create something that was both 
           minimal and functional. After exploring various options, I was particularly inspired by 
-          Brian Lovin's website design, which perfectly balances aesthetics with usability.
+          Brian Lovin&apos;s website design, which perfectly balances aesthetics with usability.
         </p>
 
         <h2 className="text-xl font-normal mt-12 mb-4">Why Next.js?</h2>
@@ -84,7 +84,7 @@ export default function BlogPost() {
           </li>
         </ul>
 
-        <h2 className="text-xl font-normal mt-12 mb-4">What's Next?</h2>
+        <h2 className="text-xl font-normal mt-12 mb-4">What&apos;s Next?</h2>
         <p className="text-[15px] text-gray-700 dark:text-gray-300 leading-relaxed">
           This is just the beginning. I plan to continue improving the site with:
         </p>
