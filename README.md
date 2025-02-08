@@ -1,22 +1,40 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Personal Website
 
-## Getting Started
+My personal website built with Next.js, TypeScript, and Tailwind CSS. Inspired by [Brian Lovin's](https://brianlovin.com) design.
 
-First, run the development server:
+## Tech Stack
+
+- [Next.js 14](https://nextjs.org/)
+- [TypeScript](https://www.typescriptlang.org/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [Lucide Icons](https://lucide.dev/)
+- [Heroicons](https://heroicons.com/)
+
+## Development
+
+First, install dependencies:
+
+```bash
+npm install
+```
+
+Then, run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Features
+
+- 🌙 Dark mode support
+- 📱 Responsive design
+- ⚡️ Fast page loads
+- 🎨 Clean, minimal design
+- 📝 Blog/Writing section
+- 🛠 Stack/Tools showcase
+- �� Project portfolio
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
