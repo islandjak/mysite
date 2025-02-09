@@ -10,9 +10,9 @@ const posts = [
     slug: 'building-personal-website-nextjs',
   },
   {
-    title: 'The Power of Consistent Design Systems',
+    title: 'Building Just My Beer: A Journey of Data, Design, and User Experience',
     date: 'March 1, 2024',
-    slug: 'power-of-consistent-design-systems',
+    slug: 'building-just-my-beer',
   },
   {
     title: 'Modern Web Development Best Practices',
@@ -27,11 +27,14 @@ export default function WritingLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const isRootPath = pathname === '/writing';
 
   return (
-    <div className="flex">
-      {/* Secondary Sidebar */}
-      <aside className="w-[300px] min-h-screen border-r border-gray-100 dark:border-neutral-800 bg-gray-50/90 dark:bg-neutral-900/90">
+    <div className="flex flex-col md:flex-row">
+      {/* Secondary Sidebar - full width on mobile when on root path */}
+      <aside className={`${
+        isRootPath ? 'block' : 'hidden md:block'
+      } md:w-[300px] border-r border-gray-100 dark:border-neutral-800 bg-gray-50/90 dark:bg-neutral-900/90`}>
         <div className="sticky top-0 overflow-y-auto h-screen">
           <div className="py-8">
             <div className="px-6">
@@ -56,20 +59,20 @@ export default function WritingLayout({
                       href={`/writing/${post.slug}`}
                       className={`block group ${
                         isActive 
-                          ? 'bg-black px-6 py-3 -mx-6 rounded-md' 
+                          ? 'bg-black dark:bg-white px-6 py-3 -mx-6 rounded-md' 
                           : 'py-1 hover:bg-gray-100 dark:hover:bg-neutral-800 px-3 -mx-3 rounded-md'
                       }`}
                     >
                       <article>
                         <h2 className={`text-[15px] font-medium transition-colors mb-1 ${
                           isActive 
-                            ? 'text-white' 
+                            ? 'text-white dark:text-black' 
                             : 'group-hover:text-blue-600 dark:group-hover:text-blue-500'
                         }`}>
                           {post.title}
                         </h2>
                         <time className={`block text-[12px] ${
-                          isActive ? 'text-gray-300' : 'text-gray-500'
+                          isActive ? 'text-gray-300 dark:text-gray-700' : 'text-gray-500'
                         }`}>
                           {post.date}
                         </time>
@@ -83,8 +86,10 @@ export default function WritingLayout({
         </div>
       </aside>
 
-      {/* Main Content */}
-      <main className="flex-1 bg-white dark:bg-black">
+      {/* Main Content - hidden on mobile when on root path */}
+      <main className={`${
+        isRootPath ? 'hidden md:block' : 'block'
+      } flex-1 bg-white dark:bg-black`}>
         <div className="py-8 px-16">
           {children}
         </div>

@@ -69,11 +69,14 @@ export default function StackLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const isRootPath = pathname === '/stack';
 
   return (
-    <div className="flex">
-      {/* Secondary Sidebar */}
-      <aside className="w-[300px] min-h-screen border-r border-gray-100 dark:border-neutral-800 bg-gray-50/90 dark:bg-neutral-900/90">
+    <div className="flex flex-col md:flex-row">
+      {/* Secondary Sidebar - full width on mobile when on root path */}
+      <aside className={`${
+        isRootPath ? 'block' : 'hidden md:block'
+      } md:w-[300px] border-r border-gray-100 dark:border-neutral-800 bg-gray-50/90 dark:bg-neutral-900/90`}>
         <div className="sticky top-0 overflow-y-auto h-screen">
           <div className="py-8">
             <div className="px-6">
@@ -132,8 +135,10 @@ export default function StackLayout({
         </div>
       </aside>
 
-      {/* Main Content */}
-      <main className="flex-1 bg-white dark:bg-black">
+      {/* Main Content - hidden on mobile when on root path */}
+      <main className={`${
+        isRootPath ? 'hidden md:block' : 'block'
+      } flex-1 bg-white dark:bg-black`}>
         <div className="py-8 px-16">
           {children}
         </div>

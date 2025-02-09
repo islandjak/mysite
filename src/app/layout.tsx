@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import { ThemeProvider } from './providers/theme-provider';
 import StyledComponentsRegistry from './lib/registry';
 import Navigation from './components/Navigation';
+import MobileNav from './components/MobileNav';
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -25,13 +26,18 @@ export default function RootLayout({
         <StyledComponentsRegistry>
           <ThemeProvider>
             <div className="flex">
-              {/* Sidebar */}
-              <nav className="fixed inset-y-0 w-[220px] border-r border-gray-100 dark:border-neutral-800 bg-gray-50/90 dark:bg-neutral-900/90">
+              {/* Desktop Sidebar - hidden on mobile */}
+              <nav className="hidden md:fixed md:inset-y-0 md:w-[220px] md:block border-r border-gray-100 dark:border-neutral-800 bg-gray-50/90 dark:bg-neutral-900/90">
                 <Navigation />
               </nav>
               
-              {/* Main content */}
-              <main className="flex-1 pl-[220px]">
+              {/* Mobile Navigation */}
+              <div className="md:hidden">
+                <MobileNav />
+              </div>
+
+              {/* Main content - adjusted padding for mobile */}
+              <main className="flex-1 md:pl-[220px]">
                 {children}
               </main>
             </div>

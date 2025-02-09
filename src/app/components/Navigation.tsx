@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { HomeIcon, BookOpenIcon, UserIcon, DocumentTextIcon, BeakerIcon, ShieldCheckIcon, CubeIcon, CodeBracketIcon } from '@heroicons/react/24/outline';
+import { HomeIcon, BookOpenIcon, UserIcon, DocumentTextIcon, BeakerIcon, CodeBracketIcon } from '@heroicons/react/24/outline';
 import { ExternalLink, Twitter, Linkedin, Github } from 'lucide-react';
 
 const navItems = [
@@ -18,25 +18,23 @@ const meSection = [
 
 const projectsSection = [
   { name: 'Just My Beer', path: '/projects/just-my-beer', icon: BeakerIcon },
-  { name: 'Figma Plugins', path: '/figma-plugins', icon: CubeIcon },
-  { name: 'Security Checklist', path: '/security-checklist', icon: ShieldCheckIcon },
   { name: 'Personal Site', path: '/projects/personal-site', icon: CodeBracketIcon },
 ];
 
 const onlineSection = [
   { 
     name: 'Twitter', 
-    href: 'https://twitter.com/yourusername',
+    href: 'https://twitter.com/jacklandis29',
     icon: Twitter
   },
   { 
     name: 'LinkedIn', 
-    href: 'https://linkedin.com/in/yourusername',
+    href: 'https://linkedin.com/in/jacklandis',
     icon: Linkedin
   },
   { 
     name: 'GitHub', 
-    href: 'https://github.com/yourusername',
+    href: 'https://github.com/islandjak',
     icon: Github
   },
 ];
