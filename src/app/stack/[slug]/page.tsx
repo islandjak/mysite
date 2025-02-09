@@ -22,11 +22,17 @@ const apps = [
   // ... other apps with their long descriptions
 ];
 
-export default function AppPage({
-  params,
-}: {
+export async function generateStaticParams() {
+  return apps.map((app) => ({
+    slug: app.slug,
+  }));
+}
+
+type PageProps = {
   params: { slug: string };
-}) {
+};
+
+export default function AppPage({ params }: PageProps) {
   const app = apps.find(app => app.slug === params.slug);
   
   if (!app) {
