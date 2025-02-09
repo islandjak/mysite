@@ -22,7 +22,14 @@ const apps = [
   // ... other apps with their long descriptions
 ];
 
-export default function AppPage({ params }: { params: { slug: string } }) {
+interface PageProps {
+  params: {
+    slug: string;
+  };
+  searchParams: { [key: string]: string | string[] | undefined };
+}
+
+export default function AppPage({ params, searchParams }: PageProps) {
   const app = apps.find(app => app.slug === params.slug);
   
   if (!app) {
