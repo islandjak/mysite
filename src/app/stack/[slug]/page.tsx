@@ -28,12 +28,13 @@ export async function generateStaticParams() {
   }));
 }
 
-type PageProps = {
-  params: { slug: string };
-};
+interface Props {
+  params: Promise<{ slug: string }>;
+}
 
-export default async function AppPage({ params }: PageProps) {
-  const app = apps.find(app => app.slug === params.slug);
+export default async function AppPage({ params }: Props) {
+  const resolvedParams = await params;
+  const app = apps.find(app => app.slug === resolvedParams.slug);
   
   if (!app) {
     notFound();
