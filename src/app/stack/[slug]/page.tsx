@@ -32,7 +32,7 @@ type PageProps = {
   params: { slug: string };
 };
 
-export default function AppPage({ params }: PageProps) {
+export default async function AppPage({ params }: PageProps) {
   const app = apps.find(app => app.slug === params.slug);
   
   if (!app) {
