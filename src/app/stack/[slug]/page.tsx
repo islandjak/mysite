@@ -22,12 +22,11 @@ const apps = [
   // ... other apps with their long descriptions
 ];
 
-type Props = {
-  params: { slug: string }
-  searchParams: { [key: string]: string | string[] | undefined }
-}
-
-export default async function AppPage({ params }: Props) {
+export default function AppPage({
+  params,
+}: {
+  params: { slug: string };
+}) {
   const app = apps.find(app => app.slug === params.slug);
   
   if (!app) {
