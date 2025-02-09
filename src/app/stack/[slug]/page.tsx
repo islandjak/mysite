@@ -26,10 +26,9 @@ interface PageProps {
   params: {
     slug: string;
   };
-  searchParams: { [key: string]: string | string[] | undefined };
 }
 
-export default function AppPage({ params, searchParams }: PageProps) {
+export default function AppPage({ params }: PageProps) {
   const app = apps.find(app => app.slug === params.slug);
   
   if (!app) {
