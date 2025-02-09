@@ -22,13 +22,12 @@ const apps = [
   // ... other apps with their long descriptions
 ];
 
-interface PageProps {
-  params: {
-    slug: string;
-  };
+type Props = {
+  params: { slug: string }
+  searchParams: { [key: string]: string | string[] | undefined }
 }
 
-export default function AppPage({ params }: PageProps) {
+export default async function AppPage({ params }: Props) {
   const app = apps.find(app => app.slug === params.slug);
   
   if (!app) {
