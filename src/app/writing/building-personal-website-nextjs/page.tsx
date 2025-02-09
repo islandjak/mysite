@@ -6,9 +6,9 @@ export default function BlogPost() {
 
       <p>
         When I decided to rebuild my personal website, I wanted to create something that was both 
-        minimal and functional. I was particularly inspired by <a href="https://brianlovin.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-700 dark:text-blue-500 dark:hover:text-blue-400">Brian Lovin's website</a>, which 
+        minimal and functional. I was particularly inspired by <a href="https://brianlovin.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-700 dark:text-blue-500 dark:hover:text-blue-400">Brian Lovin&apos;s website</a>, which 
         exemplifies a perfect balance of aesthetics and usability. His design approach influenced many aspects 
-        of this site, and I'm grateful for the inspiration.
+        of this site, and I&apos;m grateful for the inspiration.
       </p>
 
       <h2>Tech Stack and Architecture</h2>

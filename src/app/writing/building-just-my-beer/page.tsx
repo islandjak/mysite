@@ -31,12 +31,12 @@ export default function Article() {
       </div>
 
       <p>
-        Just My Beer started as a personal project inspired by my uncle's impressive craft beer collection. As a software engineer and admirer of his extensive beer knowledge, I wanted to create a platform that would help catalog and showcase his vast collection of unique brews. What began as a way to digitize his beer journey has evolved into a platform where enthusiasts can discover, track, and share their beer experiences.
+        Just My Beer started as a personal project inspired by my uncle&apos;s impressive craft beer collection. As a software engineer and admirer of his extensive beer knowledge, I wanted to create a platform that would help catalog and showcase his vast collection of unique brews. What began as a way to digitize his beer journey has evolved into a platform where enthusiasts can discover, track, and share their beer experiences.
       </p>
 
       <h2>Tech Stack and Architecture</h2>
       <p>
-        To handle my uncle's growing collection and ensure scalability for other enthusiasts, I built the application with a modern and robust tech stack:
+        To handle my uncle&apos;s growing collection and ensure scalability for other enthusiasts, I built the application with a modern and robust tech stack:
       </p>
       <ul>
         <li><strong>Backend:</strong> Flask provides a lightweight yet powerful Python framework for our API endpoints and data processing</li>
@@ -47,11 +47,11 @@ export default function Article() {
 
       <h2>Key Features</h2>
       <p>
-        The core functionality of Just My Beer was designed with my uncle's needs in mind, but has grown to include features for all beer enthusiasts:
+        The core functionality of Just My Beer was designed with my uncle&apos;s needs in mind, but has grown to include features for all beer enthusiasts:
       </p>
       <ul>
         <li><strong>Interactive Map:</strong> A dynamic map interface showing brewery locations and tracking where each beer in the collection originated</li>
-        <li><strong>Leaderboard System:</strong> Gamification elements that track and display achievements, inspired by my uncle's quest to try new and unique beers</li>
+        <li><strong>Leaderboard System:</strong> Gamification elements that track and display achievements, inspired by my uncle&apos;s quest to try new and unique beers</li>
         <li><strong>Advanced Search:</strong> Powerful search functionality with filters for beer style, brewery, and location, making it easy to find specific beers in large collections</li>
         <li><strong>User Profiles:</strong> Personalized profiles where users can track their beer history and share recommendations</li>
       </ul>
@@ -73,10 +73,10 @@ export default function Article() {
         We focused heavily on enhancing the overall user experience:
       </p>
       <ul>
-        <li><strong>Visual Feedback:</strong> Added loading skeletons, smooth transitions, and improved "no results" states with helpful suggestions</li>
+        <li><strong>Visual Feedback:</strong> Added loading skeletons, smooth transitions, and improved &quot;no results&quot; states with helpful suggestions</li>
         <li><strong>Performance:</strong> Implemented debouncing, infinite scroll, and strategic caching for faster response times</li>
         <li><strong>Personalization:</strong> Enabled users to save favorite searches and discover related beers</li>
-        <li><strong>Smart Suggestions:</strong> Added "Did you mean?" corrections and related search suggestions</li>
+        <li><strong>Smart Suggestions:</strong> Added &quot;Did you mean?&quot; corrections and related search suggestions</li>
       </ul>
 
       <h2>Technical Challenges</h2>
@@ -84,7 +84,7 @@ export default function Article() {
         Building Just My Beer came with its share of interesting technical challenges:
       </p>
       <ul>
-        <li><strong>Data Management:</strong> Implementing efficient data structures and caching strategies to handle my uncle's extensive collection and growing user contributions</li>
+        <li><strong>Data Management:</strong> Implementing efficient data structures and caching strategies to handle my uncle&apos;s extensive collection and growing user contributions</li>
         <li><strong>Geospatial Queries:</strong> Optimizing location-based searches and map rendering to visualize the geographic diversity of the collection</li>
         <li><strong>Real-time Updates:</strong> Implementing WebSocket connections for live updates to the leaderboard and user achievements</li>
         <li><strong>Mobile Responsiveness:</strong> Ensuring a consistent and intuitive experience for cataloging beers on the go</li>
@@ -92,7 +92,7 @@ export default function Article() {
 
       <h2>Future Enhancements</h2>
       <p>
-        Inspired by my uncle's continued exploration of craft beers, the roadmap for Just My Beer includes several exciting features:
+        Inspired by my uncle&apos;s continued exploration of craft beers, the roadmap for Just My Beer includes several exciting features:
       </p>
       <ul>
         <li>Integration with popular beer rating platforms for expanded data coverage</li>
@@ -103,7 +103,7 @@ export default function Article() {
       </ul>
 
       <p>
-        Building Just My Beer has been an exciting journey that combines technical challenges with my uncle's passion for craft beer. What started as a simple way to catalog his collection has grown into a platform that helps beer enthusiasts discover and share their experiences. I look forward to continuing its development and adding new features that enhance the craft beer discovery experience for everyone.
+        Building Just My Beer has been an exciting journey that combines technical challenges with my uncle&apos;s passion for craft beer. What started as a simple way to catalog his collection has grown into a platform that helps beer enthusiasts discover and share their experiences. I look forward to continuing its development and adding new features that enhance the craft beer discovery experience for everyone.
       </p>
     </article>
   );
