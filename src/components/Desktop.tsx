@@ -489,14 +489,21 @@ const Desktop: React.FC = () => {
     const desktopRect = document.querySelector('.min-h-screen')?.getBoundingClientRect() || { left: 0, top: 0 };
     
     // Calculate absolute position of the icon relative to the viewport
-    const iconAbsX = desktopRect.left + iconPosition.x + 40; // Approximate center of icon
-    const iconAbsY = desktopRect.top + iconPosition.y + 40;
+    // Using more accurate positioning with icon dimensions (80px width/height)
+    const iconWidth = 80;
+    const iconHeight = 80;
+    const iconCenterX = desktopRect.left + iconPosition.x + (iconWidth / 2);
+    const iconCenterY = desktopRect.top + iconPosition.y + (iconHeight / 2);
+    
+    // Debug logs to help identify position issues (can be removed later)
+    console.log("Icon position:", iconCenterX, iconCenterY);
+    console.log("Trash position:", trashRect.left, trashRect.top, trashRect.right, trashRect.bottom);
     
     return (
-      iconAbsX >= trashRect.left &&
-      iconAbsX <= trashRect.right &&
-      iconAbsY >= trashRect.top &&
-      iconAbsY <= trashRect.bottom
+      iconCenterX >= trashRect.left &&
+      iconCenterX <= trashRect.right &&
+      iconCenterY >= trashRect.top &&
+      iconCenterY <= trashRect.bottom
     );
   };
 
@@ -505,11 +512,17 @@ const Desktop: React.FC = () => {
     // Get the current position of the icon
     const currentPosition = iconPositions[window];
     
-    // Calculate current drag position
+    // Calculate current drag position with delta values for real-time positioning
     const dragPosition = {
       x: currentPosition.x + info.delta.x,
       y: currentPosition.y + info.delta.y
     };
+    
+    // Update position in real-time for smoother dragging
+    setIconPositions(prev => ({
+      ...prev,
+      [window]: dragPosition
+    }));
     
     // Check if icon is over trash bin and update trash active state
     const isTrash = isOverTrashBin(dragPosition);
@@ -518,23 +531,11 @@ const Desktop: React.FC = () => {
 
   // Handle icon drag end
   const handleIconDragEnd = (window: WindowType, info: any) => {
-    // Get the current position of the icon
+    // Get the final position directly from the current state
     const currentPosition = iconPositions[window];
     
-    // Calculate new position
-    const newPosition = {
-      x: currentPosition.x + info.offset.x,
-      y: currentPosition.y + info.offset.y
-    };
-    
     // Check if icon is over trash bin
-    const isTrash = isOverTrashBin(newPosition);
-    
-    // Update icon position
-    setIconPositions(prev => ({
-      ...prev,
-      [window]: newPosition
-    }));
+    const isTrash = isOverTrashBin(currentPosition);
     
     // If over trash bin, show gag prompt
     if (isTrash) {
@@ -573,13 +574,13 @@ const Desktop: React.FC = () => {
       message: randomMessage,
     });
 
-    // Hide error message after 5 seconds
+    // Make error message more noticeable with longer display time
     setTimeout(() => {
       setErrorMessage({
         visible: false,
         message: '',
       });
-    }, 5000);
+    }, 6000); // Increased from 5000ms to 6000ms
   };
 
   // Update the useEffect hook that uses handleClickOutside
@@ -859,16 +860,17 @@ const Desktop: React.FC = () => {
       {/* Trash Bin */}
       <motion.div 
         ref={trashBinRef}
-        className={`fixed bottom-8 right-8 flex flex-col items-center cursor-pointer z-5 transition-colors ${trashActive ? 'scale-110' : ''}`}
+        className={`fixed bottom-8 right-8 flex flex-col items-center cursor-pointer z-5 transition-all duration-300 ${trashActive ? 'scale-110' : ''}`}
         animate={{
-          scale: trashActive ? 1.1 : 1,
-          backgroundColor: trashActive ? 'rgba(255, 0, 0, 0.1)' : 'rgba(0, 0, 0, 0)',
+          scale: trashActive ? 1.2 : 1,
+          backgroundColor: trashActive ? 'rgba(255, 0, 0, 0.2)' : 'rgba(0, 0, 0, 0)',
           borderRadius: '8px',
-          padding: '4px'
+          padding: trashActive ? '8px' : '4px',
+          boxShadow: trashActive ? '0 0 15px rgba(255, 0, 0, 0.5)' : 'none'
         }}
       >
-        <div className={`text-4xl mb-2 bg-black bg-opacity-10 backdrop-blur-sm w-16 h-16 flex items-center justify-center rounded-lg shadow-sm ${trashActive ? 'bg-red-500 bg-opacity-20' : ''}`}>🗑️</div>
-        <div className="text-xs text-center px-2 py-1 rounded bg-black bg-opacity-30 backdrop-blur-sm text-white">Trash</div>
+        <div className={`text-4xl mb-2 bg-black bg-opacity-10 backdrop-blur-sm w-16 h-16 flex items-center justify-center rounded-lg shadow-sm transition-all duration-300 ${trashActive ? 'bg-red-500 bg-opacity-40 text-5xl' : ''}`}>🗑️</div>
+        <div className={`text-xs text-center px-2 py-1 rounded backdrop-blur-sm transition-all duration-300 ${trashActive ? 'bg-red-600 bg-opacity-50 text-white font-bold' : 'bg-black bg-opacity-30 text-white'}`}>Trash</div>
       </motion.div>
 
       {/* Windows */}
@@ -1010,6 +1012,7 @@ const Desktop: React.FC = () => {
             exit={{ opacity: 0, y: 20 }}
             transition={{ duration: 0.3 }}
             className="fixed top-1/4 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-6 py-4 rounded-lg shadow-lg z-50 max-w-md text-center"
+            style={{ boxShadow: '0 0 20px rgba(255, 0, 0, 0.5)' }}
           >
             <div className="text-2xl mb-2">⚠️</div>
             <p className="font-medium">{errorMessage.message}</p>
