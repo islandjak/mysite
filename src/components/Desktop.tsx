@@ -258,6 +258,9 @@ const Desktop: React.FC = () => {
   const [activeWindow, setActiveWindow] = useState<WindowType | null>(null);
   const [zIndexOrder, setZIndexOrder] = useState<WindowType[]>([]);
 
+  // Current time state
+  const [currentTime, setCurrentTime] = useState<string>('');
+
   // Right-click menu state
   const [contextMenu, setContextMenu] = useState<{
     visible: boolean;
@@ -572,6 +575,25 @@ const Desktop: React.FC = () => {
     };
   }, []);
 
+  // Add time update effect
+  useEffect(() => {
+    const updateTime = () => {
+      const now = new Date();
+      const hours = now.getHours();
+      const minutes = now.getMinutes();
+      const formattedTime = `${hours}:${minutes < 10 ? '0' + minutes : minutes}`;
+      setCurrentTime(formattedTime);
+    };
+    
+    // Update time immediately
+    updateTime();
+    
+    // Update time every minute
+    const interval = setInterval(updateTime, 60000);
+    
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div 
       className="min-h-screen p-8 relative overflow-hidden"
@@ -589,6 +611,115 @@ const Desktop: React.FC = () => {
         }
       }}
     >
+      {/* Mac-like Menu Bar */}
+      <motion.div 
+        className="fixed top-0 left-0 right-0 h-8 bg-black bg-opacity-40 backdrop-blur-md z-50 flex items-center px-4 shadow-sm"
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        <div className="flex items-center space-x-4">
+          {/* Apple Logo */}
+          <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M18.71,19.5C17.88,20.74 17,21.95 15.66,21.97C14.32,22 13.89,21.18 12.37,21.18C10.84,21.18 10.37,21.95 9.1,22C7.79,22.05 6.8,20.68 5.96,19.47C4.25,17 2.94,12.45 4.7,9.39C5.57,7.87 7.13,6.91 8.82,6.88C10.1,6.86 11.32,7.75 12.11,7.75C12.89,7.75 14.37,6.68 15.92,6.84C16.57,6.87 18.39,7.1 19.56,8.82C19.47,8.88 17.39,10.1 17.41,12.63C17.44,15.65 20.06,16.66 20.09,16.67C20.06,16.74 19.67,18.11 18.71,19.5M13,3.5C13.73,2.67 14.94,2.04 15.94,2C16.07,3.17 15.6,4.35 14.9,5.19C14.21,6.04 13.07,6.7 11.95,6.61C11.8,5.46 12.36,4.26 13,3.5Z" />
+          </svg>
+          
+          {/* App Name (Jack Landis) */}
+          <span className="font-semibold text-white">Jack Landis</span>
+          
+          {/* Menu Items */}
+          <span className="text-white text-opacity-80 text-sm">File</span>
+          <span className="text-white text-opacity-80 text-sm">Edit</span>
+          <span className="text-white text-opacity-80 text-sm">View</span>
+          <span className="text-white text-opacity-80 text-sm">Window</span>
+          <span className="text-white text-opacity-80 text-sm">Help</span>
+        </div>
+        
+        {/* Right side of menu bar */}
+        <div className="ml-auto flex items-center space-x-3">
+          <span className="text-white text-opacity-80 text-sm">{currentTime}</span>
+          <svg className="w-4 h-4 text-white text-opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          <svg className="w-4 h-4 text-white text-opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+        </div>
+      </motion.div>
+
+      {/* Adjust the top padding to account for the menu bar */}
+      <div className="pt-4"></div>
+
+      {/* Jack Landis Name Header - Keep this but move it down a bit */}
+      <motion.div 
+        className="fixed top-12 right-6 z-20"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ 
+          type: "spring", 
+          stiffness: 100, 
+          delay: 0.5 
+        }}
+      >
+        <div className="flex items-center space-x-3">
+          <div className="text-right">
+            <div className="flex items-center justify-end space-x-3 mb-1">
+              <motion.div 
+                className="text-sm text-white text-opacity-80 bg-black bg-opacity-30 backdrop-blur-sm px-3 py-1 rounded-full"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5, delay: 1.2 }}
+              >
+                {currentTime}
+              </motion.div>
+              <motion.div 
+                className="text-sm text-white text-opacity-80"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5, delay: 1.3 }}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </motion.div>
+              <motion.div 
+                className="text-sm text-white text-opacity-80"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5, delay: 1.4 }}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+              </motion.div>
+            </div>
+            <motion.h1 
+              className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent"
+              initial={{ letterSpacing: "0px" }}
+              animate={{ letterSpacing: "0.5px" }}
+              transition={{ duration: 1, delay: 1 }}
+            >
+              Jack Landis
+            </motion.h1>
+            <motion.p 
+              className="text-xs text-white text-opacity-70"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5, delay: 1.5 }}
+            >
+              Developer & Designer
+            </motion.p>
+          </div>
+          <motion.div 
+            className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white shadow-lg"
+            whileHover={{ scale: 1.1, rotate: 5 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            JL
+          </motion.div>
+        </div>
+      </motion.div>
+
       {/* Desktop Icons */}
       <div 
         ref={desktopIconsRef} 
