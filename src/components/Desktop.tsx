@@ -492,18 +492,29 @@ const Desktop: React.FC = () => {
     // Using more accurate positioning with icon dimensions (80px width/height)
     const iconWidth = 80;
     const iconHeight = 80;
+    
+    // Get the icon center for more accurate detection
     const iconCenterX = desktopRect.left + iconPosition.x + (iconWidth / 2);
     const iconCenterY = desktopRect.top + iconPosition.y + (iconHeight / 2);
     
-    // Debug logs to help identify position issues (can be removed later)
-    console.log("Icon position:", iconCenterX, iconCenterY);
-    console.log("Trash position:", trashRect.left, trashRect.top, trashRect.right, trashRect.bottom);
+    // Add a slight buffer around the trash bin to make it easier to hit (15px on all sides)
+    const buffer = 15;
     
+    // For debugging - leave these temporarily to help troubleshoot
+    console.log("Icon center:", iconCenterX, iconCenterY);
+    console.log("Trash bounds:", 
+      trashRect.left - buffer, 
+      trashRect.top - buffer, 
+      trashRect.right + buffer, 
+      trashRect.bottom + buffer
+    );
+    
+    // Check if icon center is within the trash bin bounds (with buffer)
     return (
-      iconCenterX >= trashRect.left &&
-      iconCenterX <= trashRect.right &&
-      iconCenterY >= trashRect.top &&
-      iconCenterY <= trashRect.bottom
+      iconCenterX >= (trashRect.left - buffer) &&
+      iconCenterX <= (trashRect.right + buffer) &&
+      iconCenterY >= (trashRect.top - buffer) &&
+      iconCenterY <= (trashRect.bottom + buffer)
     );
   };
 
@@ -531,15 +542,18 @@ const Desktop: React.FC = () => {
 
   // Handle icon drag end
   const handleIconDragEnd = (window: WindowType, info: any) => {
-    // Get the final position directly from the current state
+    // Get the final position from current state
     const currentPosition = iconPositions[window];
     
-    // Check if icon is over trash bin
+    // Force check if icon is over trash bin one last time at drag end
     const isTrash = isOverTrashBin(currentPosition);
     
     // If over trash bin, show gag prompt
     if (isTrash) {
+      console.log("Icon is over trash bin! Triggering interaction.");
       handleTrashInteraction();
+    } else {
+      console.log("Icon is not over trash bin at end position:", currentPosition);
     }
     
     // Reset trash active state
@@ -548,12 +562,19 @@ const Desktop: React.FC = () => {
 
   // Extract trash interaction logic to a separate function
   const handleTrashInteraction = () => {
-    // Animate trash bin
+    // Visual feedback - animate trash bin
     if (trashBinRef.current) {
-      trashBinRef.current.classList.add('trash-shake');
+      // Add both shake and active classes for enhanced visual effect
+      trashBinRef.current.classList.add('trash-shake', 'trash-active');
       setTimeout(() => {
         if (trashBinRef.current) {
           trashBinRef.current.classList.remove('trash-shake');
+          // Keep the active class a bit longer for visual emphasis
+          setTimeout(() => {
+            if (trashBinRef.current) {
+              trashBinRef.current.classList.remove('trash-active');
+            }
+          }, 500);
         }
       }, 1000);
     }
@@ -569,6 +590,7 @@ const Desktop: React.FC = () => {
     
     const randomMessage = errorMessages[Math.floor(Math.random() * errorMessages.length)];
     
+    // Make error message visible
     setErrorMessage({
       visible: true,
       message: randomMessage,
@@ -580,7 +602,7 @@ const Desktop: React.FC = () => {
         visible: false,
         message: '',
       });
-    }, 6000); // Increased from 5000ms to 6000ms
+    }, 6000);
   };
 
   // Update the useEffect hook that uses handleClickOutside
@@ -616,13 +638,24 @@ const Desktop: React.FC = () => {
         border-radius: 4px;
       }
       .trash-shake {
-        animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        animation: shake 0.8s cubic-bezier(.36,.07,.19,.97) both;
       }
       @keyframes shake {
-        10%, 90% { transform: translate3d(-1px, 0, 0); }
-        20%, 80% { transform: translate3d(2px, 0, 0); }
-        30%, 50%, 70% { transform: translate3d(-3px, 0, 0); }
-        40%, 60% { transform: translate3d(3px, 0, 0); }
+        0%, 100% { transform: rotate(0deg); }
+        10%, 90% { transform: translate3d(-2px, 0, 0) rotate(-2deg); }
+        20%, 80% { transform: translate3d(4px, 0, 0) rotate(2deg); }
+        30%, 50%, 70% { transform: translate3d(-6px, 0, 0) rotate(-4deg); }
+        40%, 60% { transform: translate3d(6px, 0, 0) rotate(4deg); }
+      }
+      .trash-active {
+        transform: scale(1.2);
+        background-color: rgba(255, 0, 0, 0.3);
+        box-shadow: 0 0 20px rgba(255, 0, 0, 0.7);
+      }
+      @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(255, 50, 50, 0.7); }
+        70% { box-shadow: 0 0 0 15px rgba(255, 50, 50, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(255, 50, 50, 0); }
       }
     `;
     document.head.appendChild(style);
@@ -863,14 +896,14 @@ const Desktop: React.FC = () => {
         className={`fixed bottom-8 right-8 flex flex-col items-center cursor-pointer z-5 transition-all duration-300 ${trashActive ? 'scale-110' : ''}`}
         animate={{
           scale: trashActive ? 1.2 : 1,
-          backgroundColor: trashActive ? 'rgba(255, 0, 0, 0.2)' : 'rgba(0, 0, 0, 0)',
+          backgroundColor: trashActive ? 'rgba(255, 0, 0, 0.3)' : 'rgba(0, 0, 0, 0)',
           borderRadius: '8px',
-          padding: trashActive ? '8px' : '4px',
-          boxShadow: trashActive ? '0 0 15px rgba(255, 0, 0, 0.5)' : 'none'
+          padding: trashActive ? '10px' : '4px',
+          boxShadow: trashActive ? '0 0 20px rgba(255, 0, 0, 0.7)' : 'none'
         }}
       >
-        <div className={`text-4xl mb-2 bg-black bg-opacity-10 backdrop-blur-sm w-16 h-16 flex items-center justify-center rounded-lg shadow-sm transition-all duration-300 ${trashActive ? 'bg-red-500 bg-opacity-40 text-5xl' : ''}`}>🗑️</div>
-        <div className={`text-xs text-center px-2 py-1 rounded backdrop-blur-sm transition-all duration-300 ${trashActive ? 'bg-red-600 bg-opacity-50 text-white font-bold' : 'bg-black bg-opacity-30 text-white'}`}>Trash</div>
+        <div className={`text-4xl mb-2 bg-black bg-opacity-10 backdrop-blur-sm w-16 h-16 flex items-center justify-center rounded-lg shadow-sm transition-all duration-300 ${trashActive ? 'bg-red-500 bg-opacity-60 text-5xl' : ''}`}>🗑️</div>
+        <div className={`text-xs text-center px-2 py-1 rounded backdrop-blur-sm transition-all duration-300 ${trashActive ? 'bg-red-600 bg-opacity-70 text-white font-bold' : 'bg-black bg-opacity-30 text-white'}`}>Trash</div>
       </motion.div>
 
       {/* Windows */}
@@ -1012,10 +1045,13 @@ const Desktop: React.FC = () => {
             exit={{ opacity: 0, y: 20 }}
             transition={{ duration: 0.3 }}
             className="fixed top-1/4 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-6 py-4 rounded-lg shadow-lg z-50 max-w-md text-center"
-            style={{ boxShadow: '0 0 20px rgba(255, 0, 0, 0.5)' }}
+            style={{ 
+              boxShadow: '0 0 30px rgba(255, 50, 50, 0.7)',
+              animation: 'pulse 2s infinite'
+            }}
           >
             <div className="text-2xl mb-2">⚠️</div>
-            <p className="font-medium">{errorMessage.message}</p>
+            <p className="font-bold">{errorMessage.message}</p>
           </motion.div>
         )}
       </AnimatePresence>

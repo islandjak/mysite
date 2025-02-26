@@ -43,7 +43,7 @@ const DesktopIcon: React.FC<DesktopIconProps> = ({
     // Reset dragging state after a short delay to allow for click events
     setTimeout(() => {
       setIsDragging(false);
-    }, 50); // Reduced from 100ms to 50ms for responsiveness
+    }, 50); // Keep this short for responsiveness
   };
 
   const handleDrag = (event: MouseEvent | TouchEvent | PointerEvent, info: any) => {
@@ -63,7 +63,9 @@ const DesktopIcon: React.FC<DesktopIconProps> = ({
       dragTransition={{ 
         power: 0, 
         timeConstant: 0,
-        modifyTarget: (target) => target // Return the exact target for precise positioning
+        modifyTarget: (target) => target,
+        bounceStiffness: 0,
+        bounceDamping: 0
       }}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
