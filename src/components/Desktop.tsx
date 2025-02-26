@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion, useMotionValue, useTransform } from 'framer-motion';
 import DesktopIcon from './DesktopIcon';
 import Window from './Window';
 import Image from 'next/image';
@@ -268,12 +268,15 @@ const Desktop: React.FC = () => {
   const [chatOpen, setChatOpen] = useState<boolean>(false);
   const [chatInput, setChatInput] = useState<string>('');
   const [chatMessages, setChatMessages] = useState<Array<{role: 'user' | 'assistant', content: string}>>([
-    { role: 'assistant', content: 'Hello! I\'m your personal assistant. How can I help you today?' }
+    { role: 'assistant', content: 'Hello! I\'m Jack.AI, your personal assistant. How can I help you today?' }
   ]);
   const [isTyping, setIsTyping] = useState<boolean>(false);
+  const [chatPosition, setChatPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
 
   // Refs for auto-scrolling chat
   const chatContainerRef = useRef<HTMLDivElement>(null);
+  const chatHeaderRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll chat to bottom when new messages are added
   useEffect(() => {
@@ -297,24 +300,73 @@ const Desktop: React.FC = () => {
     setIsTyping(true);
     
     try {
-      // Simulate API call with a timeout
+      // Prepare messages for OpenAI API
+      const apiMessages = [
+        { role: 'system', content: 'You are Jack.AI, a helpful and friendly AI assistant created by Jack Landis. You are knowledgeable, creative, and have a touch of humor. Keep responses concise and engaging.' },
+        ...chatMessages.map(msg => ({ 
+          role: msg.role, 
+          content: msg.content 
+        })),
+        { role: 'user', content: userMessage.content }
+      ];
+      
+      // In production, this would call the OpenAI API
+      // For now, we'll simulate the API call
       setTimeout(() => {
-        // Get random response
-        const responses = [
-          "I'm here to help with whatever you need!",
-          "That's an interesting question. Let me think about it...",
-          "I'd be happy to assist with that.",
-          "I'm still learning, but I'll do my best to help you.",
-          "Thanks for chatting with me! What else would you like to know?",
-          "I'm your personal assistant, ready to make your day easier.",
-        ];
+        let response;
         
-        const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+        // Check if we're in development or if API key is not set
+        if (process.env.NODE_ENV === 'development' || !process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === 'your_openai_api_key_here') {
+          // Simulate response in development
+          const responses = [
+            "I'm here to help with whatever you need!",
+            "That's an interesting question. Let me think about it...",
+            "I'd be happy to assist with that.",
+            "I'm still learning, but I'll do my best to help you.",
+            "Thanks for chatting with me! What else would you like to know?",
+            "I'm Jack.AI, ready to make your day easier.",
+          ];
+          
+          response = responses[Math.floor(Math.random() * responses.length)];
+        } else {
+          // In production with valid API key, this would call the OpenAI API
+          // This code is just a placeholder and won't run in the current setup
+          /*
+          const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+            },
+            body: JSON.stringify({
+              model: 'gpt-3.5-turbo',
+              messages: apiMessages,
+              temperature: 0.7,
+              max_tokens: 150
+            })
+          });
+          
+          const data = await openaiResponse.json();
+          response = data.choices[0].message.content;
+          */
+          
+          // For now, just use a random response
+          const responses = [
+            "I'm here to help with whatever you need!",
+            "That's an interesting question. Let me think about it...",
+            "I'd be happy to assist with that.",
+            "I'm still learning, but I'll do my best to help you.",
+            "Thanks for chatting with me! What else would you like to know?",
+            "I'm Jack.AI, ready to make your day easier.",
+          ];
+          
+          response = responses[Math.floor(Math.random() * responses.length)];
+        }
         
         // Add assistant response
         setChatMessages(prev => [...prev, { 
           role: 'assistant', 
-          content: randomResponse 
+          content: response 
         }]);
         
         // Hide typing indicator
@@ -329,6 +381,20 @@ const Desktop: React.FC = () => {
       }]);
       setIsTyping(false);
     }
+  };
+
+  // Handle chat drag start
+  const handleChatDragStart = () => {
+    setIsDragging(true);
+  };
+
+  // Handle chat drag end
+  const handleChatDragEnd = (info: any) => {
+    setChatPosition({
+      x: chatPosition.x + info.offset.x,
+      y: chatPosition.y + info.offset.y
+    });
+    setIsDragging(false);
   };
 
   // Toggle window open/closed
@@ -431,118 +497,176 @@ const Desktop: React.FC = () => {
     <div 
       className="min-h-screen p-8 relative overflow-hidden"
     >
-      {/* Time-based Greeting / Chat Interface */}
+      {/* Jack.AI Chat Interface */}
       <motion.div
-        className="fixed top-6 left-0 right-0 mx-auto w-auto max-w-md z-20"
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
+        className="fixed z-20"
+        initial={{ opacity: 0, y: -20, x: "-50%" }}
+        animate={{ 
+          opacity: 1, 
+          y: 0,
+          x: chatPosition.x ? chatPosition.x : "-50%",
+          top: chatPosition.y ? chatPosition.y : "1.5rem",
+          left: chatPosition.x ? chatPosition.x : "50%",
+        }}
         transition={{ 
           type: "spring", 
           stiffness: 100, 
+          damping: 15,
           delay: 0.7 
+        }}
+        drag
+        dragConstraints={{ left: -600, right: 600, top: -100, bottom: 400 }}
+        dragElastic={0.1}
+        dragMomentum={false}
+        onDragStart={handleChatDragStart}
+        onDragEnd={handleChatDragEnd}
+        style={{ 
+          touchAction: "none",
+          width: chatOpen ? "400px" : "auto",
+          maxWidth: "90vw"
         }}
       >
         <motion.div 
-          className={`text-white text-opacity-90 bg-black bg-opacity-30 backdrop-blur-sm rounded-xl text-center overflow-hidden transition-all duration-300 ${
-            chatOpen ? 'h-96' : 'h-10'
+          className={`text-white text-opacity-90 bg-black bg-opacity-30 backdrop-blur-sm rounded-xl text-center overflow-hidden transition-all shadow-lg ${
+            isDragging ? 'shadow-blue-500/50' : ''
           }`}
-          whileHover={{ 
-            scale: chatOpen ? 1.0 : 1.05,
-            boxShadow: "0 10px 25px rgba(0,0,0,0.2)"
+          animate={{ 
+            height: chatOpen ? "400px" : "40px",
+            boxShadow: isDragging 
+              ? "0 0 15px 5px rgba(59, 130, 246, 0.5)" 
+              : chatOpen 
+                ? "0 10px 25px rgba(0, 0, 0, 0.2)" 
+                : "0 4px 6px rgba(0, 0, 0, 0.1)"
+          }}
+          transition={{
+            height: {
+              type: "spring",
+              stiffness: 300,
+              damping: 30
+            },
+            boxShadow: {
+              duration: 0.2
+            }
           }}
         >
           {/* Chat Header / Greeting */}
           <motion.div 
-            className="px-5 py-2 flex items-center justify-center h-10 cursor-pointer border-b border-white border-opacity-10"
-            onClick={() => setChatOpen(!chatOpen)}
+            ref={chatHeaderRef}
+            className="px-5 py-2 flex items-center justify-between h-10 cursor-move border-b border-white border-opacity-10"
           >
-            <motion.p 
-              className="text-lg font-medium m-0 flex items-center"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5, delay: 1.0 }}
+            <div className="flex items-center">
+              <motion.div
+                className="w-5 h-5 mr-2 rounded-full bg-gradient-to-r from-blue-400 to-purple-500 flex items-center justify-center text-xs font-bold"
+                animate={{ 
+                  scale: isTyping ? [1, 1.2, 1] : 1,
+                  opacity: isTyping ? [0.7, 1, 0.7] : 1
+                }}
+                transition={{ 
+                  repeat: isTyping ? Infinity : 0, 
+                  duration: 1.5 
+                }}
+              >
+                AI
+              </motion.div>
+              <motion.p 
+                className="text-lg font-medium m-0 flex items-center"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5, delay: 1.0 }}
+              >
+                Jack.AI
+              </motion.p>
+            </div>
+            
+            <motion.button
+              className="text-white text-opacity-70 hover:text-opacity-100 focus:outline-none"
+              onClick={() => setChatOpen(!chatOpen)}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
             >
-              <span className="mr-2">{chatOpen ? 'AI Assistant' : 'Hello! Click to chat with me'}</span>
               <motion.span
                 animate={{ rotate: chatOpen ? 180 : 0 }}
-                transition={{ duration: 0.3 }}
+                transition={{ duration: 0.3, type: "spring", stiffness: 200 }}
               >
                 {chatOpen ? '↑' : '↓'}
               </motion.span>
-            </motion.p>
+            </motion.button>
           </motion.div>
 
           {/* Chat Container */}
-          {chatOpen && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.3 }}
-              className="flex flex-col h-[calc(100%-2.5rem)]"
-            >
-              {/* Messages Area */}
-              <div 
-                ref={chatContainerRef}
-                className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin scrollbar-thumb-blue-500 scrollbar-track-transparent"
+          <AnimatePresence>
+            {chatOpen && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="flex flex-col h-[calc(100%-2.5rem)]"
               >
-                {chatMessages.map((msg, idx) => (
-                  <motion.div
-                    key={idx}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: idx * 0.1 }}
-                    className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                  >
-                    <div 
-                      className={`max-w-xs rounded-lg px-4 py-2 text-sm ${
-                        msg.role === 'user' 
-                          ? 'bg-blue-500 text-white' 
-                          : 'bg-gray-700 bg-opacity-50 text-white'
-                      }`}
+                {/* Messages Area */}
+                <div 
+                  ref={chatContainerRef}
+                  className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin scrollbar-thumb-blue-500 scrollbar-track-transparent"
+                >
+                  {chatMessages.map((msg, idx) => (
+                    <motion.div
+                      key={idx}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3, delay: idx * 0.1 }}
+                      className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                     >
-                      {msg.content}
-                    </div>
-                  </motion.div>
-                ))}
-                
-                {/* Typing indicator */}
-                {isTyping && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="flex justify-start"
-                  >
-                    <div className="bg-gray-700 bg-opacity-50 rounded-lg px-4 py-2 text-white">
-                      <span className="inline-block w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce mr-1"></span>
-                      <span className="inline-block w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce mr-1" style={{ animationDelay: '0.2s' }}></span>
-                      <span className="inline-block w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></span>
-                    </div>
-                  </motion.div>
-                )}
-              </div>
+                      <div 
+                        className={`max-w-xs rounded-lg px-4 py-2 text-sm ${
+                          msg.role === 'user' 
+                            ? 'bg-blue-500 text-white' 
+                            : 'bg-gray-700 bg-opacity-50 text-white'
+                        }`}
+                      >
+                        {msg.content}
+                      </div>
+                    </motion.div>
+                  ))}
+                  
+                  {/* Typing indicator */}
+                  {isTyping && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="flex justify-start"
+                    >
+                      <div className="bg-gray-700 bg-opacity-50 rounded-lg px-4 py-2 text-white">
+                        <span className="inline-block w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce mr-1"></span>
+                        <span className="inline-block w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce mr-1" style={{ animationDelay: '0.2s' }}></span>
+                        <span className="inline-block w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></span>
+                      </div>
+                    </motion.div>
+                  )}
+                </div>
 
-              {/* Input Area */}
-              <div className="p-3 border-t border-white border-opacity-10">
-                <form onSubmit={handleChatSubmit} className="flex">
-                  <input
-                    type="text"
-                    value={chatInput}
-                    onChange={(e) => setChatInput(e.target.value)}
-                    placeholder="Type a message..."
-                    className="flex-1 bg-gray-700 bg-opacity-50 text-white rounded-l-lg px-4 py-2 focus:outline-none"
-                  />
-                  <button
-                    type="submit"
-                    className="bg-blue-500 text-white rounded-r-lg px-4 hover:bg-blue-600 transition-colors"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                    </svg>
-                  </button>
-                </form>
-              </div>
-            </motion.div>
-          )}
+                {/* Input Area */}
+                <div className="p-3 border-t border-white border-opacity-10">
+                  <form onSubmit={handleChatSubmit} className="flex">
+                    <input
+                      type="text"
+                      value={chatInput}
+                      onChange={(e) => setChatInput(e.target.value)}
+                      placeholder="Type a message..."
+                      className="flex-1 bg-gray-700 bg-opacity-50 text-white rounded-l-lg px-4 py-2 focus:outline-none"
+                    />
+                    <button
+                      type="submit"
+                      className="bg-blue-500 text-white rounded-r-lg px-4 hover:bg-blue-600 transition-colors"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                      </svg>
+                    </button>
+                  </form>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </motion.div>
       </motion.div>
 
