@@ -1,36 +1,76 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Personal Website with Desktop Interface
+
+A beautiful, minimalist personal website with a desktop-like interface inspired by macOS. This project creates a unique browsing experience where content sections open like windows on a desktop.
+
+## Features
+
+- **Desktop-like Interface**: Navigation elements appear as draggable windows
+- **Beautiful Gradient Background**: Inspired by sunset/sunrise colors
+- **Minimalist Design**: Clean, simple, and elegant
+- **Responsive**: Works on all device sizes
+- **Interactive Elements**: Windows can be dragged, closed, and resized
+- **Modern Stack**: Built with Next.js, React, TypeScript, and Tailwind CSS
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
+- Node.js 18.0.0 or later
+- npm or yarn
+
+### Installation
+
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/personal-website.git
+cd personal-website
+```
+
+2. Install dependencies:
+```bash
+npm install
+# or
+yarn install
+```
+
+3. Run the development server:
 ```bash
 npm run dev
 # or
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+4. Open [http://localhost:3000](http://localhost:3000) in your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Customization
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Content
 
-## Learn More
+Edit the content in the `src/components/Desktop.tsx` file to customize:
+- About section
+- Projects section
+- Contact information
 
-To learn more about Next.js, take a look at the following resources:
+### Styling
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Global styles are in `src/app/globals.css`
+- Component-specific styles use Tailwind CSS classes
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Adding New Windows/Sections
 
-## Deploy on Vercel
+To add a new window/section:
+1. Create a new content component in `Desktop.tsx`
+2. Add a new state in the `openWindows` state object
+3. Add a new desktop icon
+4. Add a new window component with the content
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## License
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Acknowledgments
+
+- Inspired by macOS desktop interface
+- Built with [Next.js](https://nextjs.org/)
+- Styled with [Tailwind CSS](https://tailwindcss.com/)
+- Animations powered by [Framer Motion](https://www.framer.com/motion/)
