@@ -654,7 +654,7 @@ const Desktop: React.FC = () => {
     >
       {/* Time-based Greeting */}
       <motion.div
-        className="fixed top-6 left-1/2 transform -translate-x-1/2 z-20"
+        className="fixed top-6 left-1/2 transform -translate-x-1/2 z-20 w-full flex justify-center"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ 
