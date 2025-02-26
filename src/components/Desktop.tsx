@@ -664,7 +664,7 @@ const Desktop: React.FC = () => {
         }}
       >
         <motion.div 
-          className="text-white text-opacity-90 bg-black bg-opacity-30 backdrop-blur-sm px-5 py-2 rounded-full text-center"
+          className="text-white text-opacity-90 bg-black bg-opacity-30 backdrop-blur-sm px-5 py-2 rounded-full text-center flex items-center justify-center"
           whileHover={{ scale: 1.05 }}
         >
           <motion.p 
@@ -673,7 +673,7 @@ const Desktop: React.FC = () => {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 1.0 }}
           >
-            {greeting}, Jack
+            {greeting}
           </motion.p>
         </motion.div>
       </motion.div>
