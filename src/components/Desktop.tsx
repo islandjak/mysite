@@ -507,8 +507,8 @@ const Desktop: React.FC = () => {
     
     // Calculate current drag position
     const dragPosition = {
-      x: currentPosition.x + info.offset.x,
-      y: currentPosition.y + info.offset.y
+      x: currentPosition.x + info.delta.x,
+      y: currentPosition.y + info.delta.y
     };
     
     // Check if icon is over trash bin and update trash active state

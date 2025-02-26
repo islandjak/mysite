@@ -34,7 +34,7 @@ const DesktopIcon: React.FC<DesktopIconProps> = ({
     setIsDragging(true);
   };
 
-  const handleDragEnd = (info: any) => {
+  const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: any) => {
     // Call the parent's onDragEnd handler if provided
     if (onDragEnd) {
       onDragEnd(info);
@@ -46,7 +46,7 @@ const DesktopIcon: React.FC<DesktopIconProps> = ({
     }, 100);
   };
 
-  const handleDrag = (info: any) => {
+  const handleDrag = (event: MouseEvent | TouchEvent | PointerEvent, info: any) => {
     if (onDrag) {
       onDrag(info);
     }
