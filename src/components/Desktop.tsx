@@ -274,6 +274,9 @@ const Desktop: React.FC = () => {
     contact: { x: 0, y: 0 },
   });
 
+  // Track if trash bin is active (icon hovering over it)
+  const [trashActive, setTrashActive] = useState(false);
+
   // Right-click menu state
   const [contextMenu, setContextMenu] = useState<{
     visible: boolean;
@@ -483,37 +486,63 @@ const Desktop: React.FC = () => {
     if (!trashBinRef.current) return false;
     
     const trashRect = trashBinRef.current.getBoundingClientRect();
-    const iconX = iconPosition.x + 40; // Approximate center of icon
-    const iconY = iconPosition.y + 40;
+    const desktopRect = document.querySelector('.min-h-screen')?.getBoundingClientRect() || { left: 0, top: 0 };
+    
+    // Calculate absolute position of the icon relative to the viewport
+    const iconAbsX = desktopRect.left + iconPosition.x + 40; // Approximate center of icon
+    const iconAbsY = desktopRect.top + iconPosition.y + 40;
     
     return (
-      iconX >= trashRect.left &&
-      iconX <= trashRect.right &&
-      iconY >= trashRect.top &&
-      iconY <= trashRect.bottom
+      iconAbsX >= trashRect.left &&
+      iconAbsX <= trashRect.right &&
+      iconAbsY >= trashRect.top &&
+      iconAbsY <= trashRect.bottom
     );
+  };
+
+  // Handle icon drag
+  const handleIconDrag = (window: WindowType, info: any) => {
+    // Get the current position of the icon
+    const currentPosition = iconPositions[window];
+    
+    // Calculate current drag position
+    const dragPosition = {
+      x: currentPosition.x + info.offset.x,
+      y: currentPosition.y + info.offset.y
+    };
+    
+    // Check if icon is over trash bin and update trash active state
+    const isTrash = isOverTrashBin(dragPosition);
+    setTrashActive(isTrash);
   };
 
   // Handle icon drag end
   const handleIconDragEnd = (window: WindowType, info: any) => {
+    // Get the current position of the icon
+    const currentPosition = iconPositions[window];
+    
+    // Calculate new position
+    const newPosition = {
+      x: currentPosition.x + info.offset.x,
+      y: currentPosition.y + info.offset.y
+    };
+    
+    // Check if icon is over trash bin
+    const isTrash = isOverTrashBin(newPosition);
+    
     // Update icon position
     setIconPositions(prev => ({
       ...prev,
-      [window]: { 
-        x: prev[window].x + info.offset.x, 
-        y: prev[window].y + info.offset.y 
-      }
+      [window]: newPosition
     }));
     
-    // Check if icon is over trash bin
-    const newPosition = {
-      x: iconPositions[window].x + info.offset.x,
-      y: iconPositions[window].y + info.offset.y
-    };
-    
-    if (isOverTrashBin(newPosition)) {
+    // If over trash bin, show gag prompt
+    if (isTrash) {
       handleTrashInteraction();
     }
+    
+    // Reset trash active state
+    setTrashActive(false);
   };
 
   // Extract trash interaction logic to a separate function
@@ -790,43 +819,57 @@ const Desktop: React.FC = () => {
         ref={desktopIconsRef} 
         className="fixed top-8 left-8 z-5"
       >
-        <DesktopIcon
-          id="about-icon"
-          icon="👤"
-          label="About"
-          onClick={() => toggleWindow('about')}
-          onDragEnd={(info) => handleIconDragEnd('about', info)}
-          className="desktop-icon mb-6"
-        />
+        <motion.div style={{ x: iconPositions.about.x, y: iconPositions.about.y }}>
+          <DesktopIcon
+            id="about-icon"
+            icon="👤"
+            label="About"
+            onClick={() => toggleWindow('about')}
+            onDrag={(info) => handleIconDrag('about', info)}
+            onDragEnd={(info) => handleIconDragEnd('about', info)}
+            className="desktop-icon"
+          />
+        </motion.div>
         <div style={{ height: '24px' }}></div>
-        <DesktopIcon
-          id="projects-icon"
-          icon="💼"
-          label="Projects"
-          onClick={() => toggleWindow('projects')}
-          onDragEnd={(info) => handleIconDragEnd('projects', info)}
-          className="desktop-icon mb-6"
-        />
+        <motion.div style={{ x: iconPositions.projects.x, y: iconPositions.projects.y }}>
+          <DesktopIcon
+            id="projects-icon"
+            icon="💼"
+            label="Projects"
+            onClick={() => toggleWindow('projects')}
+            onDrag={(info) => handleIconDrag('projects', info)}
+            onDragEnd={(info) => handleIconDragEnd('projects', info)}
+            className="desktop-icon"
+          />
+        </motion.div>
         <div style={{ height: '24px' }}></div>
-        <DesktopIcon
-          id="contact-icon"
-          icon="✉️"
-          label="Contact"
-          onClick={() => toggleWindow('contact')}
-          onDragEnd={(info) => handleIconDragEnd('contact', info)}
-          className="desktop-icon"
-        />
+        <motion.div style={{ x: iconPositions.contact.x, y: iconPositions.contact.y }}>
+          <DesktopIcon
+            id="contact-icon"
+            icon="✉️"
+            label="Contact"
+            onClick={() => toggleWindow('contact')}
+            onDrag={(info) => handleIconDrag('contact', info)}
+            onDragEnd={(info) => handleIconDragEnd('contact', info)}
+            className="desktop-icon"
+          />
+        </motion.div>
       </div>
 
       {/* Trash Bin */}
-      <div 
+      <motion.div 
         ref={trashBinRef}
-        className="fixed bottom-8 right-8 flex flex-col items-center cursor-pointer z-5 transition-transform hover:scale-105"
-        onClick={() => {}}
+        className={`fixed bottom-8 right-8 flex flex-col items-center cursor-pointer z-5 transition-colors ${trashActive ? 'scale-110' : ''}`}
+        animate={{
+          scale: trashActive ? 1.1 : 1,
+          backgroundColor: trashActive ? 'rgba(255, 0, 0, 0.1)' : 'rgba(0, 0, 0, 0)',
+          borderRadius: '8px',
+          padding: '4px'
+        }}
       >
-        <div className="text-4xl mb-2 bg-black bg-opacity-10 backdrop-blur-sm w-16 h-16 flex items-center justify-center rounded-lg shadow-sm">🗑️</div>
+        <div className={`text-4xl mb-2 bg-black bg-opacity-10 backdrop-blur-sm w-16 h-16 flex items-center justify-center rounded-lg shadow-sm ${trashActive ? 'bg-red-500 bg-opacity-20' : ''}`}>🗑️</div>
         <div className="text-xs text-center px-2 py-1 rounded bg-black bg-opacity-30 backdrop-blur-sm text-white">Trash</div>
-      </div>
+      </motion.div>
 
       {/* Windows */}
       <AnimatePresence>
