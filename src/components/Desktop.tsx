@@ -611,48 +611,9 @@ const Desktop: React.FC = () => {
         }
       }}
     >
-      {/* Mac-like Menu Bar */}
+      {/* Jack Landis Name Header - Move to top of screen */}
       <motion.div 
-        className="fixed top-0 left-0 right-0 h-8 bg-black bg-opacity-40 backdrop-blur-md z-50 flex items-center px-4 shadow-sm"
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-      >
-        <div className="flex items-center space-x-4">
-          {/* Apple Logo */}
-          <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M18.71,19.5C17.88,20.74 17,21.95 15.66,21.97C14.32,22 13.89,21.18 12.37,21.18C10.84,21.18 10.37,21.95 9.1,22C7.79,22.05 6.8,20.68 5.96,19.47C4.25,17 2.94,12.45 4.7,9.39C5.57,7.87 7.13,6.91 8.82,6.88C10.1,6.86 11.32,7.75 12.11,7.75C12.89,7.75 14.37,6.68 15.92,6.84C16.57,6.87 18.39,7.1 19.56,8.82C19.47,8.88 17.39,10.1 17.41,12.63C17.44,15.65 20.06,16.66 20.09,16.67C20.06,16.74 19.67,18.11 18.71,19.5M13,3.5C13.73,2.67 14.94,2.04 15.94,2C16.07,3.17 15.6,4.35 14.9,5.19C14.21,6.04 13.07,6.7 11.95,6.61C11.8,5.46 12.36,4.26 13,3.5Z" />
-          </svg>
-          
-          {/* App Name (Jack Landis) */}
-          <span className="font-semibold text-white">Jack Landis</span>
-          
-          {/* Menu Items */}
-          <span className="text-white text-opacity-80 text-sm">File</span>
-          <span className="text-white text-opacity-80 text-sm">Edit</span>
-          <span className="text-white text-opacity-80 text-sm">View</span>
-          <span className="text-white text-opacity-80 text-sm">Window</span>
-          <span className="text-white text-opacity-80 text-sm">Help</span>
-        </div>
-        
-        {/* Right side of menu bar */}
-        <div className="ml-auto flex items-center space-x-3">
-          <span className="text-white text-opacity-80 text-sm">{currentTime}</span>
-          <svg className="w-4 h-4 text-white text-opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-          </svg>
-          <svg className="w-4 h-4 text-white text-opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-          </svg>
-        </div>
-      </motion.div>
-
-      {/* Adjust the top padding to account for the menu bar */}
-      <div className="pt-4"></div>
-
-      {/* Jack Landis Name Header - Keep this but move it down a bit */}
-      <motion.div 
-        className="fixed top-12 right-6 z-20"
+        className="fixed top-6 right-6 z-20"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ 
@@ -710,12 +671,19 @@ const Desktop: React.FC = () => {
               Developer & Designer
             </motion.p>
           </div>
+          {/* Replace JL circle with profile picture */}
           <motion.div 
-            className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white shadow-lg"
+            className="w-12 h-12 rounded-full overflow-hidden shadow-lg"
             whileHover={{ scale: 1.1, rotate: 5 }}
             whileTap={{ scale: 0.95 }}
           >
-            JL
+            <Image 
+              src="/prof.png" 
+              alt="Jack Landis" 
+              width={48} 
+              height={48}
+              className="w-full h-full object-cover"
+            />
           </motion.div>
         </div>
       </motion.div>
