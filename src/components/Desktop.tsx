@@ -260,6 +260,9 @@ const Desktop: React.FC = () => {
 
   // Current time state
   const [currentTime, setCurrentTime] = useState<string>('');
+  
+  // Greeting state
+  const [greeting, setGreeting] = useState<string>('');
 
   // Dark mode state
   const [darkMode, setDarkMode] = useState<boolean>(false);
@@ -584,8 +587,24 @@ const Desktop: React.FC = () => {
       const now = new Date();
       const hours = now.getHours();
       const minutes = now.getMinutes();
-      const formattedTime = `${hours}:${minutes < 10 ? '0' + minutes : minutes}`;
+      
+      // Format time in 12-hour format with AM/PM
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      const hours12 = hours % 12 || 12; // Convert 0 to 12 for 12 AM
+      const formattedTime = `${hours12}:${minutes < 10 ? '0' + minutes : minutes} ${ampm}`;
+      
       setCurrentTime(formattedTime);
+      
+      // Update greeting based on time of day
+      if (hours >= 5 && hours < 12) {
+        setGreeting('Good morning');
+      } else if (hours >= 12 && hours < 17) {
+        setGreeting('Good afternoon');
+      } else if (hours >= 17 && hours < 22) {
+        setGreeting('Good evening');
+      } else {
+        setGreeting('Good night');
+      }
     };
     
     // Update time immediately
@@ -633,6 +652,32 @@ const Desktop: React.FC = () => {
         }
       }}
     >
+      {/* Time-based Greeting */}
+      <motion.div
+        className="fixed top-6 left-1/2 transform -translate-x-1/2 z-20"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ 
+          type: "spring", 
+          stiffness: 100, 
+          delay: 0.7 
+        }}
+      >
+        <motion.div 
+          className="text-white text-opacity-90 bg-black bg-opacity-30 backdrop-blur-sm px-5 py-2 rounded-full text-center"
+          whileHover={{ scale: 1.05 }}
+        >
+          <motion.p 
+            className="text-lg font-medium"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 1.0 }}
+          >
+            {greeting}, Jack
+          </motion.p>
+        </motion.div>
+      </motion.div>
+
       {/* Jack Landis Name Header - Move to top of screen */}
       <motion.div 
         className="fixed top-6 right-6 z-20"
