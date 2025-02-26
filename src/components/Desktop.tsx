@@ -664,11 +664,11 @@ const Desktop: React.FC = () => {
         }}
       >
         <motion.div 
-          className="text-white text-opacity-90 bg-black bg-opacity-30 backdrop-blur-sm px-5 py-2 rounded-full text-center flex items-center justify-center"
+          className="text-white text-opacity-90 bg-black bg-opacity-30 backdrop-blur-sm px-5 py-2 rounded-full text-center flex items-center justify-center h-10"
           whileHover={{ scale: 1.05 }}
         >
           <motion.p 
-            className="text-lg font-medium"
+            className="text-lg font-medium m-0"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 1.0 }}
