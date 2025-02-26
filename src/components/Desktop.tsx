@@ -267,6 +267,13 @@ const Desktop: React.FC = () => {
   // Dark mode state
   const [darkMode, setDarkMode] = useState<boolean>(false);
 
+  // Track icon positions
+  const [iconPositions, setIconPositions] = useState({
+    about: { x: 0, y: 0 },
+    projects: { x: 0, y: 0 },
+    contact: { x: 0, y: 0 },
+  });
+
   // Right-click menu state
   const [contextMenu, setContextMenu] = useState<{
     visible: boolean;
@@ -471,30 +478,44 @@ const Desktop: React.FC = () => {
     }
   };
   
-  // Add handler for dragging selected icons to trash
-  const handleIconDrag = (e: React.MouseEvent) => {
-    if (selectedIcons.length > 0 && !selectionBox.visible) {
-      // Check if mouse is over trash bin
-      if (trashBinRef.current) {
-        const trashRect = trashBinRef.current.getBoundingClientRect();
-        if (
-          e.clientX >= trashRect.left &&
-          e.clientX <= trashRect.right &&
-          e.clientY >= trashRect.top &&
-          e.clientY <= trashRect.bottom
-        ) {
-          handleTrashInteraction();
-          
-          // Clear selection after dropping in trash
-          selectedIcons.forEach(icon => {
-            icon.classList.remove('selected-icon');
-          });
-          setSelectedIcons([]);
-        }
+  // Check if an icon is over the trash bin
+  const isOverTrashBin = (iconPosition: { x: number; y: number }) => {
+    if (!trashBinRef.current) return false;
+    
+    const trashRect = trashBinRef.current.getBoundingClientRect();
+    const iconX = iconPosition.x + 40; // Approximate center of icon
+    const iconY = iconPosition.y + 40;
+    
+    return (
+      iconX >= trashRect.left &&
+      iconX <= trashRect.right &&
+      iconY >= trashRect.top &&
+      iconY <= trashRect.bottom
+    );
+  };
+
+  // Handle icon drag end
+  const handleIconDragEnd = (window: WindowType, info: any) => {
+    // Update icon position
+    setIconPositions(prev => ({
+      ...prev,
+      [window]: { 
+        x: prev[window].x + info.offset.x, 
+        y: prev[window].y + info.offset.y 
       }
+    }));
+    
+    // Check if icon is over trash bin
+    const newPosition = {
+      x: iconPositions[window].x + info.offset.x,
+      y: iconPositions[window].y + info.offset.y
+    };
+    
+    if (isOverTrashBin(newPosition)) {
+      handleTrashInteraction();
     }
   };
-  
+
   // Extract trash interaction logic to a separate function
   const handleTrashInteraction = () => {
     // Animate trash bin
@@ -767,40 +788,32 @@ const Desktop: React.FC = () => {
       {/* Desktop Icons */}
       <div 
         ref={desktopIconsRef} 
-        className="fixed top-8 left-8 space-y-6 z-5"
-        onMouseUp={handleIconDrag}
+        className="fixed top-8 left-8 z-5"
       >
         <DesktopIcon
+          id="about-icon"
           icon="👤"
           label="About"
-          onClick={(e) => {
-            // If icon is already selected, open the window
-            if (selectedIcons.length === 0 || !e.currentTarget.classList.contains('selected-icon')) {
-              toggleWindow('about');
-            }
-          }}
-          className="desktop-icon"
+          onClick={() => toggleWindow('about')}
+          onDragEnd={(info) => handleIconDragEnd('about', info)}
+          className="desktop-icon mb-6"
         />
+        <div style={{ height: '24px' }}></div>
         <DesktopIcon
+          id="projects-icon"
           icon="💼"
           label="Projects"
-          onClick={(e) => {
-            // If icon is already selected, open the window
-            if (selectedIcons.length === 0 || !e.currentTarget.classList.contains('selected-icon')) {
-              toggleWindow('projects');
-            }
-          }}
-          className="desktop-icon"
+          onClick={() => toggleWindow('projects')}
+          onDragEnd={(info) => handleIconDragEnd('projects', info)}
+          className="desktop-icon mb-6"
         />
+        <div style={{ height: '24px' }}></div>
         <DesktopIcon
+          id="contact-icon"
           icon="✉️"
           label="Contact"
-          onClick={(e) => {
-            // If icon is already selected, open the window
-            if (selectedIcons.length === 0 || !e.currentTarget.classList.contains('selected-icon')) {
-              toggleWindow('contact');
-            }
-          }}
+          onClick={() => toggleWindow('contact')}
+          onDragEnd={(info) => handleIconDragEnd('contact', info)}
           className="desktop-icon"
         />
       </div>
