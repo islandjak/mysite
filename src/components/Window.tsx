@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 
 interface WindowProps {
@@ -30,7 +30,6 @@ const Window: React.FC<WindowProps> = ({
   height,
   noPadding = false,
 }) => {
-  const [isDragging, setIsDragging] = useState(false);
   const [position, setPosition] = useState(initialPosition);
   const windowRef = useRef<HTMLDivElement>(null);
 
@@ -76,11 +75,9 @@ const Window: React.FC<WindowProps> = ({
       drag
       dragMomentum={false}
       onDragStart={() => {
-        setIsDragging(true);
         bringToFront();
       }}
       onDragEnd={(e, info) => {
-        setIsDragging(false);
         // Update position when drag ends
         setPosition(prev => ({
           x: prev.x + info.offset.x,

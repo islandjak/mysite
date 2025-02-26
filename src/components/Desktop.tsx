@@ -11,12 +11,12 @@ const AboutContent = () => (
   <div className="space-y-4">
     <h2 className="text-2xl font-bold">About Me</h2>
     <p>
-      Hello! I'm a passionate developer/designer with a love for creating beautiful, 
+      Hello! I&apos;m a passionate developer/designer with a love for creating beautiful, 
       functional digital experiences. This minimalist website reflects my design philosophy: 
       simplicity, elegance, and attention to detail.
     </p>
     <p>
-      When I'm not coding, you can find me exploring nature, reading design books, 
+      When I&apos;m not coding, you can find me exploring nature, reading design books, 
       or experimenting with new creative tools and technologies.
     </p>
   </div>
@@ -93,7 +93,7 @@ const projectsData = [
           <h4 className="font-medium text-blue-300 mb-2 text-lg">Key Features</h4>
           <ul className="list-disc pl-5 space-y-2">
             <li>Comprehensive beer database with detailed information</li>
-            <li>Dual rating system with community and "Paul" ratings</li>
+            <li>Dual rating system with community and &quot;Paul&quot; ratings</li>
             <li>Interactive map for geolocation-based beer exploration</li>
             <li>User profiles with reviews, favorites, and submissions</li>
             <li>Real-time activity feed of community interactions</li>
@@ -220,7 +220,7 @@ const ContactContent = () => (
   <div className="space-y-4">
     <h2 className="text-2xl font-bold">Contact Me</h2>
     <p>
-      I'm always open to new opportunities and collaborations. Feel free to reach out!
+      I&apos;m always open to new opportunities and collaborations. Feel free to reach out!
     </p>
     <div className="space-y-2 mt-4">
       <div className="flex items-center">
@@ -354,23 +354,13 @@ const Desktop: React.FC = () => {
   };
 
   // Handle right click for context menu
-  const handleContextMenu = (e: React.MouseEvent) => {
+  const handleRightClick = (e: React.MouseEvent) => {
     e.preventDefault();
     setContextMenu({
       visible: true,
       x: e.clientX,
       y: e.clientY,
     });
-  };
-
-  // Handle click outside to close context menu
-  const handleClickOutside = () => {
-    if (contextMenu.visible) {
-      setContextMenu({
-        ...contextMenu,
-        visible: false,
-      });
-    }
   };
 
   // Handle mouse down for selection box
@@ -533,8 +523,18 @@ const Desktop: React.FC = () => {
     }, 5000);
   };
 
-  // Add event listeners for document clicks
+  // Update the useEffect hook that uses handleClickOutside
   useEffect(() => {
+    // Move handleClickOutside inside the useEffect
+    const handleClickOutside = () => {
+      if (contextMenu.visible) {
+        setContextMenu(prevState => ({
+          ...prevState,
+          visible: false,
+        }));
+      }
+    };
+
     const handleDocumentClick = () => {
       handleClickOutside();
     };
@@ -575,7 +575,7 @@ const Desktop: React.FC = () => {
   return (
     <div 
       className="min-h-screen p-8 relative overflow-hidden"
-      onContextMenu={handleContextMenu}
+      onContextMenu={handleRightClick}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
