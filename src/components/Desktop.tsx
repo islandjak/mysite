@@ -261,63 +261,75 @@ const Desktop: React.FC = () => {
   // Current time state
   const [currentTime, setCurrentTime] = useState<string>('');
   
-  // Greeting state
-  const [greeting, setGreeting] = useState<string>('');
-
   // Dark mode state
   const [darkMode, setDarkMode] = useState<boolean>(false);
 
-  // Track icon positions
-  const [iconPositions, setIconPositions] = useState({
-    about: { x: 0, y: 0 },
-    projects: { x: 0, y: 0 },
-    contact: { x: 0, y: 0 },
-  });
+  // Chat state
+  const [chatOpen, setChatOpen] = useState<boolean>(false);
+  const [chatInput, setChatInput] = useState<string>('');
+  const [chatMessages, setChatMessages] = useState<Array<{role: 'user' | 'assistant', content: string}>>([
+    { role: 'assistant', content: 'Hello! I\'m your personal assistant. How can I help you today?' }
+  ]);
+  const [isTyping, setIsTyping] = useState<boolean>(false);
 
-  // Track if trash bin is active (icon hovering over it)
-  const [trashActive, setTrashActive] = useState(false);
+  // Refs for auto-scrolling chat
+  const chatContainerRef = useRef<HTMLDivElement>(null);
 
-  // Right-click menu state
-  const [contextMenu, setContextMenu] = useState<{
-    visible: boolean;
-    x: number;
-    y: number;
-  }>({
-    visible: false,
-    x: 0,
-    y: 0,
-  });
+  // Auto-scroll chat to bottom when new messages are added
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  }, [chatMessages]);
 
-  // Selection box state
-  const [selectionBox, setSelectionBox] = useState<{
-    visible: boolean;
-    startX: number;
-    startY: number;
-    endX: number;
-    endY: number;
-  }>({
-    visible: false,
-    startX: 0,
-    startY: 0,
-    endX: 0,
-    endY: 0,
-  });
-
-  // Error message state
-  const [errorMessage, setErrorMessage] = useState<{
-    visible: boolean;
-    message: string;
-  }>({
-    visible: false,
-    message: '',
-  });
-
-  // Add selected icons state
-  const [selectedIcons, setSelectedIcons] = useState<Element[]>([]);
-
-  // Refs for desktop icons and trash bin
-  const desktopIconsRef = useRef<HTMLDivElement>(null);
-  const trashBinRef = useRef<HTMLDivElement>(null);
+  // Chat submission handler
+  const handleChatSubmit = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    
+    if (!chatInput.trim()) return;
+    
+    // Add user message to chat
+    const userMessage = { role: 'user' as const, content: chatInput };
+    setChatMessages(prev => [...prev, userMessage]);
+    setChatInput('');
+    
+    // Show typing indicator
+    setIsTyping(true);
+    
+    try {
+      // Simulate API call with a timeout
+      setTimeout(() => {
+        // Get random response
+        const responses = [
+          "I'm here to help with whatever you need!",
+          "That's an interesting question. Let me think about it...",
+          "I'd be happy to assist with that.",
+          "I'm still learning, but I'll do my best to help you.",
+          "Thanks for chatting with me! What else would you like to know?",
+          "I'm your personal assistant, ready to make your day easier.",
+        ];
+        
+        const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+        
+        // Add assistant response
+        setChatMessages(prev => [...prev, { 
+          role: 'assistant', 
+          content: randomResponse 
+        }]);
+        
+        // Hide typing indicator
+        setIsTyping(false);
+      }, 1000);
+      
+    } catch (error) {
+      console.error("Error in chat:", error);
+      setChatMessages(prev => [...prev, { 
+        role: 'assistant', 
+        content: "I'm sorry, I encountered an error. Please try again." 
+      }]);
+      setIsTyping(false);
+    }
+  };
 
   // Toggle window open/closed
   const toggleWindow = (window: WindowType) => {
@@ -372,300 +384,7 @@ const Desktop: React.FC = () => {
     return index === 0 ? 50 : 10 + (zIndexOrder.length - index);
   };
 
-  // Handle right click for context menu
-  const handleRightClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setContextMenu({
-      visible: true,
-      x: e.clientX,
-      y: e.clientY,
-    });
-  };
-
-  // Handle mouse down for selection box
-  const handleMouseDown = (e: React.MouseEvent) => {
-    // Only start selection if left mouse button is pressed and not on an icon or window
-    if (e.button === 0 && e.target === e.currentTarget) {
-      // Clear selected icons if clicking on empty space
-      if (selectedIcons.length > 0) {
-        selectedIcons.forEach(icon => {
-          icon.classList.remove('selected-icon');
-        });
-        setSelectedIcons([]);
-      }
-      
-      setSelectionBox({
-        visible: true,
-        startX: e.clientX,
-        startY: e.clientY,
-        endX: e.clientX,
-        endY: e.clientY,
-      });
-    }
-  };
-
-  // Handle mouse move for selection box
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (selectionBox.visible) {
-      const newEndX = e.clientX;
-      const newEndY = e.clientY;
-      
-      setSelectionBox({
-        ...selectionBox,
-        endX: newEndX,
-        endY: newEndY,
-      });
-      
-      // Check for intersections with icons during drag
-      if (desktopIconsRef.current) {
-        const selectionRect = {
-          left: Math.min(selectionBox.startX, newEndX),
-          top: Math.min(selectionBox.startY, newEndY),
-          right: Math.max(selectionBox.startX, newEndX),
-          bottom: Math.max(selectionBox.startY, newEndY),
-        };
-        
-        const icons = desktopIconsRef.current.querySelectorAll('.desktop-icon');
-        icons.forEach((icon) => {
-          const rect = icon.getBoundingClientRect();
-          const isIntersecting = 
-            rect.left < selectionRect.right &&
-            rect.right > selectionRect.left &&
-            rect.top < selectionRect.bottom &&
-            rect.bottom > selectionRect.top;
-          
-          if (isIntersecting) {
-            icon.classList.add('selected-icon');
-          } else {
-            icon.classList.remove('selected-icon');
-          }
-        });
-      }
-    }
-  };
-
-  // Handle mouse up for selection box
-  const handleMouseUp = () => {
-    if (selectionBox.visible) {
-      // Save the currently selected icons
-      if (desktopIconsRef.current) {
-        const selectedElements = desktopIconsRef.current.querySelectorAll('.selected-icon');
-        setSelectedIcons(Array.from(selectedElements));
-      }
-
-      // Check if trash bin is in selection
-      if (trashBinRef.current) {
-        const trashRect = trashBinRef.current.getBoundingClientRect();
-        const selectionRect = {
-          left: Math.min(selectionBox.startX, selectionBox.endX),
-          top: Math.min(selectionBox.startY, selectionBox.endY),
-          right: Math.max(selectionBox.startX, selectionBox.endX),
-          bottom: Math.max(selectionBox.startY, selectionBox.endY),
-        };
-        
-        if (
-          selectionRect.left < trashRect.right &&
-          selectionRect.right > trashRect.left &&
-          selectionRect.top < trashRect.bottom &&
-          selectionRect.bottom > trashRect.top
-        ) {
-          handleTrashInteraction();
-        }
-      }
-
-      // Reset selection box
-      setSelectionBox({
-        ...selectionBox,
-        visible: false,
-      });
-    }
-  };
-  
-  // Check if an icon is over the trash bin
-  const isOverTrashBin = (iconPosition: { x: number; y: number }) => {
-    if (!trashBinRef.current) return false;
-    
-    const trashRect = trashBinRef.current.getBoundingClientRect();
-    const desktopRect = document.querySelector('.min-h-screen')?.getBoundingClientRect() || { left: 0, top: 0 };
-    
-    // Calculate absolute position of the icon relative to the viewport
-    // Using more accurate positioning with icon dimensions (80px width/height)
-    const iconWidth = 80;
-    const iconHeight = 80;
-    
-    // Get the icon center for more accurate detection
-    const iconCenterX = desktopRect.left + iconPosition.x + (iconWidth / 2);
-    const iconCenterY = desktopRect.top + iconPosition.y + (iconHeight / 2);
-    
-    // Add a slight buffer around the trash bin to make it easier to hit (15px on all sides)
-    const buffer = 15;
-    
-    // For debugging - leave these temporarily to help troubleshoot
-    console.log("Icon center:", iconCenterX, iconCenterY);
-    console.log("Trash bounds:", 
-      trashRect.left - buffer, 
-      trashRect.top - buffer, 
-      trashRect.right + buffer, 
-      trashRect.bottom + buffer
-    );
-    
-    // Check if icon center is within the trash bin bounds (with buffer)
-    return (
-      iconCenterX >= (trashRect.left - buffer) &&
-      iconCenterX <= (trashRect.right + buffer) &&
-      iconCenterY >= (trashRect.top - buffer) &&
-      iconCenterY <= (trashRect.bottom + buffer)
-    );
-  };
-
-  // Handle icon drag
-  const handleIconDrag = (window: WindowType, info: any) => {
-    // Get the current position of the icon
-    const currentPosition = iconPositions[window];
-    
-    // Calculate current drag position with delta values for real-time positioning
-    const dragPosition = {
-      x: currentPosition.x + info.delta.x,
-      y: currentPosition.y + info.delta.y
-    };
-    
-    // Update position in real-time for smoother dragging
-    setIconPositions(prev => ({
-      ...prev,
-      [window]: dragPosition
-    }));
-    
-    // Check if icon is over trash bin and update trash active state
-    const isTrash = isOverTrashBin(dragPosition);
-    setTrashActive(isTrash);
-  };
-
-  // Handle icon drag end
-  const handleIconDragEnd = (window: WindowType, info: any) => {
-    // Get the final position from current state
-    const currentPosition = iconPositions[window];
-    
-    // Force check if icon is over trash bin one last time at drag end
-    const isTrash = isOverTrashBin(currentPosition);
-    
-    // If over trash bin, show gag prompt
-    if (isTrash) {
-      console.log("Icon is over trash bin! Triggering interaction.");
-      handleTrashInteraction();
-    } else {
-      console.log("Icon is not over trash bin at end position:", currentPosition);
-    }
-    
-    // Reset trash active state
-    setTrashActive(false);
-  };
-
-  // Extract trash interaction logic to a separate function
-  const handleTrashInteraction = () => {
-    // Visual feedback - animate trash bin
-    if (trashBinRef.current) {
-      // Add both shake and active classes for enhanced visual effect
-      trashBinRef.current.classList.add('trash-shake', 'trash-active');
-      setTimeout(() => {
-        if (trashBinRef.current) {
-          trashBinRef.current.classList.remove('trash-shake');
-          // Keep the active class a bit longer for visual emphasis
-          setTimeout(() => {
-            if (trashBinRef.current) {
-              trashBinRef.current.classList.remove('trash-active');
-            }
-          }, 500);
-        }
-      }, 1000);
-    }
-    
-    // Show error message with random humor
-    const errorMessages = [
-      "Nice try! You can't delete my life's work that easily. Did you think you were being funny?",
-      "ERROR: Cannot delete portfolio. Reason: It took way too long to build.",
-      "Whoa there! Those icons have families! Think of the little pixel children!",
-      "I see what you did there. Very clever. But my portfolio shall live on!",
-      "Task failed successfully: Your attempt to delete my work has been logged and will be remembered forever."
-    ];
-    
-    const randomMessage = errorMessages[Math.floor(Math.random() * errorMessages.length)];
-    
-    // Make error message visible
-    setErrorMessage({
-      visible: true,
-      message: randomMessage,
-    });
-
-    // Make error message more noticeable with longer display time
-    setTimeout(() => {
-      setErrorMessage({
-        visible: false,
-        message: '',
-      });
-    }, 6000);
-  };
-
-  // Update the useEffect hook that uses handleClickOutside
-  useEffect(() => {
-    // Move handleClickOutside inside the useEffect
-    const handleClickOutside = () => {
-      if (contextMenu.visible) {
-        setContextMenu(prevState => ({
-          ...prevState,
-          visible: false,
-        }));
-      }
-    };
-
-    const handleDocumentClick = () => {
-      handleClickOutside();
-    };
-
-    document.addEventListener('click', handleDocumentClick);
-    return () => {
-      document.removeEventListener('click', handleDocumentClick);
-    };
-  }, [contextMenu.visible]);
-
-  // Add this at the end of the component, just before the return statement
-  useEffect(() => {
-    // Add CSS for selected icons and trash animation
-    const style = document.createElement('style');
-    style.innerHTML = `
-      .selected-icon {
-        outline: 2px solid rgba(59, 130, 246, 0.8);
-        background-color: rgba(59, 130, 246, 0.2);
-        border-radius: 4px;
-      }
-      .trash-shake {
-        animation: shake 0.8s cubic-bezier(.36,.07,.19,.97) both;
-      }
-      @keyframes shake {
-        0%, 100% { transform: rotate(0deg); }
-        10%, 90% { transform: translate3d(-2px, 0, 0) rotate(-2deg); }
-        20%, 80% { transform: translate3d(4px, 0, 0) rotate(2deg); }
-        30%, 50%, 70% { transform: translate3d(-6px, 0, 0) rotate(-4deg); }
-        40%, 60% { transform: translate3d(6px, 0, 0) rotate(4deg); }
-      }
-      .trash-active {
-        transform: scale(1.2);
-        background-color: rgba(255, 0, 0, 0.3);
-        box-shadow: 0 0 20px rgba(255, 0, 0, 0.7);
-      }
-      @keyframes pulse {
-        0% { box-shadow: 0 0 0 0 rgba(255, 50, 50, 0.7); }
-        70% { box-shadow: 0 0 0 15px rgba(255, 50, 50, 0); }
-        100% { box-shadow: 0 0 0 0 rgba(255, 50, 50, 0); }
-      }
-    `;
-    document.head.appendChild(style);
-    
-    return () => {
-      document.head.removeChild(style);
-    };
-  }, []);
-
-  // Add time update effect
+  // Update time update effect
   useEffect(() => {
     const updateTime = () => {
       const now = new Date();
@@ -678,17 +397,6 @@ const Desktop: React.FC = () => {
       const formattedTime = `${hours12}:${minutes < 10 ? '0' + minutes : minutes} ${ampm}`;
       
       setCurrentTime(formattedTime);
-      
-      // Update greeting based on time of day
-      if (hours >= 5 && hours < 12) {
-        setGreeting('Good morning');
-      } else if (hours >= 12 && hours < 17) {
-        setGreeting('Good afternoon');
-      } else if (hours >= 17 && hours < 22) {
-        setGreeting('Good evening');
-      } else {
-        setGreeting('Good night');
-      }
     };
     
     // Update time immediately
@@ -722,23 +430,10 @@ const Desktop: React.FC = () => {
   return (
     <div 
       className="min-h-screen p-8 relative overflow-hidden"
-      onContextMenu={handleRightClick}
-      onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onClick={(e) => {
-        // Clear selection when clicking on desktop background
-        if (e.target === e.currentTarget && selectedIcons.length > 0) {
-          selectedIcons.forEach(icon => {
-            icon.classList.remove('selected-icon');
-          });
-          setSelectedIcons([]);
-        }
-      }}
     >
-      {/* Time-based Greeting */}
+      {/* Time-based Greeting / Chat Interface */}
       <motion.div
-        className="fixed top-6 left-0 right-0 mx-auto w-auto max-w-max z-20"
+        className="fixed top-6 left-0 right-0 mx-auto w-auto max-w-md z-20"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ 
@@ -748,17 +443,106 @@ const Desktop: React.FC = () => {
         }}
       >
         <motion.div 
-          className="text-white text-opacity-90 bg-black bg-opacity-30 backdrop-blur-sm px-5 py-2 rounded-full text-center flex items-center justify-center h-10"
-          whileHover={{ scale: 1.05 }}
+          className={`text-white text-opacity-90 bg-black bg-opacity-30 backdrop-blur-sm rounded-xl text-center overflow-hidden transition-all duration-300 ${
+            chatOpen ? 'h-96' : 'h-10'
+          }`}
+          whileHover={{ 
+            scale: chatOpen ? 1.0 : 1.05,
+            boxShadow: "0 10px 25px rgba(0,0,0,0.2)"
+          }}
         >
-          <motion.p 
-            className="text-lg font-medium m-0"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 1.0 }}
+          {/* Chat Header / Greeting */}
+          <motion.div 
+            className="px-5 py-2 flex items-center justify-center h-10 cursor-pointer border-b border-white border-opacity-10"
+            onClick={() => setChatOpen(!chatOpen)}
           >
-            {greeting}
-          </motion.p>
+            <motion.p 
+              className="text-lg font-medium m-0 flex items-center"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5, delay: 1.0 }}
+            >
+              <span className="mr-2">{chatOpen ? 'AI Assistant' : 'Hello! Click to chat with me'}</span>
+              <motion.span
+                animate={{ rotate: chatOpen ? 180 : 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                {chatOpen ? '↑' : '↓'}
+              </motion.span>
+            </motion.p>
+          </motion.div>
+
+          {/* Chat Container */}
+          {chatOpen && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3 }}
+              className="flex flex-col h-[calc(100%-2.5rem)]"
+            >
+              {/* Messages Area */}
+              <div 
+                ref={chatContainerRef}
+                className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin scrollbar-thumb-blue-500 scrollbar-track-transparent"
+              >
+                {chatMessages.map((msg, idx) => (
+                  <motion.div
+                    key={idx}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: idx * 0.1 }}
+                    className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                  >
+                    <div 
+                      className={`max-w-xs rounded-lg px-4 py-2 text-sm ${
+                        msg.role === 'user' 
+                          ? 'bg-blue-500 text-white' 
+                          : 'bg-gray-700 bg-opacity-50 text-white'
+                      }`}
+                    >
+                      {msg.content}
+                    </div>
+                  </motion.div>
+                ))}
+                
+                {/* Typing indicator */}
+                {isTyping && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex justify-start"
+                  >
+                    <div className="bg-gray-700 bg-opacity-50 rounded-lg px-4 py-2 text-white">
+                      <span className="inline-block w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce mr-1"></span>
+                      <span className="inline-block w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce mr-1" style={{ animationDelay: '0.2s' }}></span>
+                      <span className="inline-block w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></span>
+                    </div>
+                  </motion.div>
+                )}
+              </div>
+
+              {/* Input Area */}
+              <div className="p-3 border-t border-white border-opacity-10">
+                <form onSubmit={handleChatSubmit} className="flex">
+                  <input
+                    type="text"
+                    value={chatInput}
+                    onChange={(e) => setChatInput(e.target.value)}
+                    placeholder="Type a message..."
+                    className="flex-1 bg-gray-700 bg-opacity-50 text-white rounded-l-lg px-4 py-2 focus:outline-none"
+                  />
+                  <button
+                    type="submit"
+                    className="bg-blue-500 text-white rounded-r-lg px-4 hover:bg-blue-600 transition-colors"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                    </svg>
+                  </button>
+                </form>
+              </div>
+            </motion.div>
+          )}
         </motion.div>
       </motion.div>
 
@@ -849,62 +633,31 @@ const Desktop: React.FC = () => {
       </motion.div>
 
       {/* Desktop Icons */}
-      <div 
-        ref={desktopIconsRef} 
-        className="fixed top-8 left-8 z-5"
-      >
-        <motion.div style={{ x: iconPositions.about.x, y: iconPositions.about.y }}>
-          <DesktopIcon
-            id="about-icon"
-            icon="👤"
-            label="About"
-            onClick={() => toggleWindow('about')}
-            onDrag={(info) => handleIconDrag('about', info)}
-            onDragEnd={(info) => handleIconDragEnd('about', info)}
-            className="desktop-icon"
-          />
-        </motion.div>
-        <div style={{ height: '24px' }}></div>
-        <motion.div style={{ x: iconPositions.projects.x, y: iconPositions.projects.y }}>
-          <DesktopIcon
-            id="projects-icon"
-            icon="💼"
-            label="Projects"
-            onClick={() => toggleWindow('projects')}
-            onDrag={(info) => handleIconDrag('projects', info)}
-            onDragEnd={(info) => handleIconDragEnd('projects', info)}
-            className="desktop-icon"
-          />
-        </motion.div>
-        <div style={{ height: '24px' }}></div>
-        <motion.div style={{ x: iconPositions.contact.x, y: iconPositions.contact.y }}>
-          <DesktopIcon
-            id="contact-icon"
-            icon="✉️"
-            label="Contact"
-            onClick={() => toggleWindow('contact')}
-            onDrag={(info) => handleIconDrag('contact', info)}
-            onDragEnd={(info) => handleIconDragEnd('contact', info)}
-            className="desktop-icon"
-          />
-        </motion.div>
+      <div className="fixed top-8 left-8 z-5 space-y-6">
+        <DesktopIcon
+          id="about-icon"
+          icon="👤"
+          label="About"
+          onClick={() => toggleWindow('about')}
+          className="desktop-icon"
+        />
+        
+        <DesktopIcon
+          id="projects-icon"
+          icon="💼"
+          label="Projects"
+          onClick={() => toggleWindow('projects')}
+          className="desktop-icon"
+        />
+        
+        <DesktopIcon
+          id="contact-icon"
+          icon="✉️"
+          label="Contact"
+          onClick={() => toggleWindow('contact')}
+          className="desktop-icon"
+        />
       </div>
-
-      {/* Trash Bin */}
-      <motion.div 
-        ref={trashBinRef}
-        className={`fixed bottom-8 right-8 flex flex-col items-center cursor-pointer z-5 transition-all duration-300 ${trashActive ? 'scale-110' : ''}`}
-        animate={{
-          scale: trashActive ? 1.2 : 1,
-          backgroundColor: trashActive ? 'rgba(255, 0, 0, 0.3)' : 'rgba(0, 0, 0, 0)',
-          borderRadius: '8px',
-          padding: trashActive ? '10px' : '4px',
-          boxShadow: trashActive ? '0 0 20px rgba(255, 0, 0, 0.7)' : 'none'
-        }}
-      >
-        <div className={`text-4xl mb-2 bg-black bg-opacity-10 backdrop-blur-sm w-16 h-16 flex items-center justify-center rounded-lg shadow-sm transition-all duration-300 ${trashActive ? 'bg-red-500 bg-opacity-60 text-5xl' : ''}`}>🗑️</div>
-        <div className={`text-xs text-center px-2 py-1 rounded backdrop-blur-sm transition-all duration-300 ${trashActive ? 'bg-red-600 bg-opacity-70 text-white font-bold' : 'bg-black bg-opacity-30 text-white'}`}>Trash</div>
-      </motion.div>
 
       {/* Windows */}
       <AnimatePresence>
@@ -957,104 +710,22 @@ const Desktop: React.FC = () => {
         )}
       </AnimatePresence>
 
-      {/* Context Menu */}
-      {contextMenu.visible && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.95 }}
-          transition={{ duration: 0.1 }}
-          className="fixed bg-gray-800 bg-opacity-90 backdrop-blur-sm rounded-lg shadow-lg overflow-hidden z-50 w-64"
-          style={{ 
-            left: `${contextMenu.x}px`, 
-            top: `${contextMenu.y}px`,
-            transformOrigin: 'top left'
-          }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="p-4 border-b border-gray-700">
-            <h3 className="text-lg font-bold text-white">Jack Landis</h3>
-            <p className="text-sm text-gray-300">Developer & Designer</p>
-          </div>
-          <div className="p-2">
-            <a 
-              href="https://github.com/jacklandis" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="flex items-center p-2 rounded-md hover:bg-gray-700 transition-colors text-white"
-            >
-              <svg className="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-              </svg>
-              GitHub
-            </a>
-            <a 
-              href="https://linkedin.com/in/jacklandis" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="flex items-center p-2 rounded-md hover:bg-gray-700 transition-colors text-white"
-            >
-              <svg className="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
-              </svg>
-              LinkedIn
-            </a>
-            <a 
-              href="https://twitter.com/jacklandis" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="flex items-center p-2 rounded-md hover:bg-gray-700 transition-colors text-white"
-            >
-              <svg className="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
-              </svg>
-              Twitter
-            </a>
-            <a 
-              href="mailto:jack@example.com" 
-              className="flex items-center p-2 rounded-md hover:bg-gray-700 transition-colors text-white"
-            >
-              <svg className="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path d="M0 3v18h24v-18h-24zm21.518 2l-9.518 7.713-9.518-7.713h19.036zm-19.518 14v-11.817l10 8.104 10-8.104v11.817h-20z"/>
-              </svg>
-              Email
-            </a>
-          </div>
-        </motion.div>
-      )}
-
-      {/* Selection Box */}
-      {selectionBox.visible && (
-        <div
-          className="absolute border border-blue-400 bg-blue-400 bg-opacity-20 pointer-events-none z-40"
-          style={{
-            left: Math.min(selectionBox.startX, selectionBox.endX),
-            top: Math.min(selectionBox.startY, selectionBox.endY),
-            width: Math.abs(selectionBox.endX - selectionBox.startX),
-            height: Math.abs(selectionBox.endY - selectionBox.startY),
-          }}
-        />
-      )}
-
-      {/* Error Message */}
-      <AnimatePresence>
-        {errorMessage.visible && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            transition={{ duration: 0.3 }}
-            className="fixed top-1/4 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-6 py-4 rounded-lg shadow-lg z-50 max-w-md text-center"
-            style={{ 
-              boxShadow: '0 0 30px rgba(255, 50, 50, 0.7)',
-              animation: 'pulse 2s infinite'
-            }}
-          >
-            <div className="text-2xl mb-2">⚠️</div>
-            <p className="font-bold">{errorMessage.message}</p>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Add CSS for the chat interface */}
+      <style jsx global>{`
+        .scrollbar-thin::-webkit-scrollbar {
+          width: 6px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+          background-color: rgba(59, 130, 246, 0.5);
+          border-radius: 3px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+          background-color: rgba(59, 130, 246, 0.7);
+        }
+      `}</style>
 
       {/* Desktop Footer */}
       <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-30 backdrop-blur-sm px-6 py-2 rounded-full text-white text-opacity-70 text-sm">
