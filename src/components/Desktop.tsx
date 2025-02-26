@@ -271,7 +271,7 @@ const Desktop: React.FC = () => {
     { role: 'assistant', content: 'Hello! I\'m Jack.AI, your personal assistant. How can I help you today?' }
   ]);
   const [isTyping, setIsTyping] = useState<boolean>(false);
-  const [chatPosition, setChatPosition] = useState({ x: 0, y: 0 });
+  const [chatPosition, setChatPosition] = useState<{ x: number | null, y: number | null }>({ x: null, y: null });
   const [isDragging, setIsDragging] = useState(false);
 
   // Refs for auto-scrolling chat
@@ -390,10 +390,12 @@ const Desktop: React.FC = () => {
 
   // Handle chat drag end
   const handleChatDragEnd = (info: any) => {
-    setChatPosition({
-      x: chatPosition.x + info.offset.x,
-      y: chatPosition.y + info.offset.y
-    });
+    if (info.offset) {
+      setChatPosition({
+        x: (chatPosition.x || 0) + info.offset.x,
+        y: (chatPosition.y || 0) + info.offset.y
+      });
+    }
     setIsDragging(false);
   };
 
@@ -500,23 +502,22 @@ const Desktop: React.FC = () => {
       {/* Jack.AI Chat Interface */}
       <motion.div
         className="fixed z-20"
-        initial={{ opacity: 0, y: -20, x: "-50%" }}
+        initial={{ opacity: 0, y: 0, x: "-50%" }}
         animate={{ 
           opacity: 1, 
           y: 0,
-          x: chatPosition.x ? chatPosition.x : "-50%",
-          top: chatPosition.y ? chatPosition.y : "1.5rem",
-          left: chatPosition.x ? chatPosition.x : "50%",
+          x: chatPosition.x !== null ? chatPosition.x : "-50%",
+          top: chatPosition.y !== null ? chatPosition.y : "1.5rem",
+          left: chatPosition.x !== null ? chatPosition.x : "50%",
         }}
         transition={{ 
           type: "spring", 
-          stiffness: 100, 
-          damping: 15,
-          delay: 0.7 
+          stiffness: 300, 
+          damping: 25
         }}
-        drag
+        drag={chatOpen}
         dragConstraints={{ left: -600, right: 600, top: -100, bottom: 400 }}
-        dragElastic={0.1}
+        dragElastic={0.05}
         dragMomentum={false}
         onDragStart={handleChatDragStart}
         onDragEnd={handleChatDragEnd}
@@ -541,8 +542,8 @@ const Desktop: React.FC = () => {
           transition={{
             height: {
               type: "spring",
-              stiffness: 300,
-              damping: 30
+              stiffness: 200,
+              damping: 25
             },
             boxShadow: {
               duration: 0.2
@@ -552,7 +553,7 @@ const Desktop: React.FC = () => {
           {/* Chat Header / Greeting */}
           <motion.div 
             ref={chatHeaderRef}
-            className="px-5 py-2 flex items-center justify-between h-10 cursor-move border-b border-white border-opacity-10"
+            className={`px-5 py-2 flex items-center justify-between h-10 border-b border-white border-opacity-10 ${chatOpen ? 'cursor-move' : 'cursor-default'}`}
           >
             <div className="flex items-center">
               <motion.div
@@ -594,14 +595,21 @@ const Desktop: React.FC = () => {
           </motion.div>
 
           {/* Chat Container */}
-          <AnimatePresence>
+          <AnimatePresence mode="wait">
             {chatOpen && (
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.3 }}
-                className="flex flex-col h-[calc(100%-2.5rem)]"
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "calc(100% - 2.5rem)" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ 
+                  opacity: { duration: 0.2 },
+                  height: { 
+                    type: "spring", 
+                    stiffness: 200, 
+                    damping: 25 
+                  }
+                }}
+                className="flex flex-col"
               >
                 {/* Messages Area */}
                 <div 
@@ -614,13 +622,13 @@ const Desktop: React.FC = () => {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.3, delay: idx * 0.1 }}
-                      className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                      className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} w-full`}
                     >
                       <div 
                         className={`max-w-xs rounded-lg px-4 py-2 text-sm ${
                           msg.role === 'user' 
-                            ? 'bg-blue-500 text-white' 
-                            : 'bg-gray-700 bg-opacity-50 text-white'
+                            ? 'bg-blue-500 text-white text-right' 
+                            : 'bg-gray-700 bg-opacity-50 text-white text-left'
                         }`}
                       >
                         {msg.content}
