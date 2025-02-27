@@ -271,7 +271,7 @@ const Desktop: React.FC = () => {
     { role: 'assistant', content: 'Hello! I\'m Jack.AI, your personal assistant. How can I help you today?' }
   ]);
   const [isTyping, setIsTyping] = useState<boolean>(false);
-  const [chatPosition, setChatPosition] = useState<{ x: number | null, y: number | null }>({ x: null, y: null });
+  const [chatPosition, setChatPosition] = useState<{ x: number, y: number }>({ x: window.innerWidth / 2, y: 50 });
   const [isDragging, setIsDragging] = useState(false);
 
   // Refs for auto-scrolling chat
@@ -383,22 +383,6 @@ const Desktop: React.FC = () => {
     }
   };
 
-  // Handle chat drag start
-  const handleChatDragStart = () => {
-    setIsDragging(true);
-  };
-
-  // Handle chat drag end
-  const handleChatDragEnd = (info: any) => {
-    if (info.offset) {
-      setChatPosition({
-        x: (chatPosition.x || 0) + info.offset.x,
-        y: (chatPosition.y || 0) + info.offset.y
-      });
-    }
-    setIsDragging(false);
-  };
-
   // Toggle window open/closed
   const toggleWindow = (window: WindowType) => {
     setOpenWindows((prev) => {
@@ -495,137 +479,103 @@ const Desktop: React.FC = () => {
     }
   }, []);
 
+  // Initialize window size on first render
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setChatPosition({ x: window.innerWidth / 2 - 200, y: 50 });
+    }
+  }, []);
+
   return (
     <div 
       className="min-h-screen p-8 relative overflow-hidden"
     >
-      {/* Jack.AI Chat Interface - Grok Inspired */}
-      <motion.div
-        className="fixed z-20"
-        initial={{ opacity: 0 }}
-        animate={{ 
-          opacity: 1,
-          x: chatPosition.x !== null ? chatPosition.x : "-50%",
-          top: chatPosition.y !== null ? chatPosition.y : "1.5rem",
-          left: chatPosition.x !== null ? chatPosition.x : "50%",
-        }}
-        transition={{ 
-          type: "tween", 
-          duration: 0.2
-        }}
-        drag={chatOpen}
-        dragMomentum={false}
-        onDragStart={handleChatDragStart}
-        onDragEnd={handleChatDragEnd}
-        style={{ 
-          touchAction: "none",
-          width: chatOpen ? "400px" : "auto",
-          maxWidth: "90vw"
-        }}
-      >
-        <motion.div 
-          className={`text-white bg-black bg-opacity-70 rounded-xl overflow-hidden shadow-lg ${
-            isDragging ? 'ring-2 ring-blue-500' : ''
-          }`}
-          layout
-          transition={{
-            layout: {
-              type: "tween",
-              duration: 0.15
-            }
-          }}
+      {/* Jack.AI Chat Interface */}
+      {!chatOpen ? (
+        <div 
+          className="fixed top-6 left-1/2 transform -translate-x-1/2 z-20 cursor-pointer"
+          onClick={() => setChatOpen(true)}
         >
-          {/* Chat Header */}
-          <div 
-            className={`px-4 py-3 flex items-center justify-between border-b border-gray-700 ${chatOpen ? 'cursor-move' : 'cursor-pointer'}`}
-            onClick={!chatOpen ? () => setChatOpen(true) : undefined}
-          >
-            <div className="flex items-center">
-              <div
-                className={`w-6 h-6 mr-2 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-xs font-bold ${isTyping ? 'animate-pulse' : ''}`}
-              >
-                X
-              </div>
-              <p className="text-base font-medium">Jack.AI</p>
+          <div className="flex items-center bg-black bg-opacity-70 px-4 py-2 rounded-xl shadow-md">
+            <div className="w-6 h-6 mr-2 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-xs font-bold">
+              X
             </div>
-            
-            {chatOpen && (
-              <button
-                className="text-gray-400 hover:text-white focus:outline-none transition-colors"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setChatOpen(false);
-                }}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414L8.586 8 5.293 4.707a1 1 0 011.414-1.414L10 6.586l3.293-3.293a1 1 0 011.414 1.414L11.414 8l3.293 3.293a1 1 0 010 1.414z" clipRule="evenodd" />
-                </svg>
-              </button>
-            )}
+            <p className="text-white text-base font-medium">Jack.AI</p>
           </div>
-
-          {/* Chat Container */}
-          {chatOpen && (
-            <div className="flex flex-col h-[350px]">
-              {/* Messages Area */}
-              <div 
-                ref={chatContainerRef}
-                className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-900"
-              >
-                {chatMessages.map((msg, idx) => (
-                  <div
-                    key={idx}
-                    className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} w-full animate-fadeIn`}
+        </div>
+      ) : (
+        <Window
+          key="chat-window"
+          title="Jack.AI"
+          isOpen={chatOpen}
+          onClose={() => setChatOpen(false)}
+          initialPosition={chatPosition}
+          isActive={true}
+          zIndex={100}
+          onFocus={() => {}}
+          width="400px"
+          height="450px"
+          noPadding={true}
+        >
+          <div className="flex flex-col h-full">
+            {/* Messages Area */}
+            <div 
+              ref={chatContainerRef}
+              className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-900"
+            >
+              {chatMessages.map((msg, idx) => (
+                <div
+                  key={idx}
+                  className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} w-full`}
+                >
+                  <div 
+                    className={`max-w-[85%] rounded-2xl px-4 py-2 text-sm ${
+                      msg.role === 'user' 
+                        ? 'bg-blue-600 text-white' 
+                        : 'bg-gray-800 text-gray-100'
+                    }`}
                   >
-                    <div 
-                      className={`max-w-[85%] rounded-2xl px-4 py-2 text-sm ${
-                        msg.role === 'user' 
-                          ? 'bg-blue-600 text-white' 
-                          : 'bg-gray-800 text-gray-100'
-                      }`}
-                    >
-                      {msg.content}
-                    </div>
+                    {msg.content}
                   </div>
-                ))}
-                
-                {/* Typing indicator */}
-                {isTyping && (
-                  <div className="flex justify-start w-full">
-                    <div className="bg-gray-800 rounded-2xl px-4 py-2 flex items-center space-x-1">
-                      <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></div>
-                      <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
-                      <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
-                    </div>
+                </div>
+              ))}
+              
+              {/* Typing indicator */}
+              {isTyping && (
+                <div className="flex justify-start w-full">
+                  <div className="bg-gray-800 rounded-2xl px-4 py-2 flex items-center space-x-1">
+                    <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></div>
+                    <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+                    <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
                   </div>
-                )}
-              </div>
-
-              {/* Input Area */}
-              <div className="p-3 bg-gray-800 border-t border-gray-700">
-                <form onSubmit={handleChatSubmit} className="flex">
-                  <input
-                    type="text"
-                    value={chatInput}
-                    onChange={(e) => setChatInput(e.target.value)}
-                    placeholder="Message Jack.AI..."
-                    className="flex-1 bg-gray-700 text-white rounded-l-lg px-4 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  />
-                  <button
-                    type="submit"
-                    className="bg-blue-600 text-white rounded-r-lg px-3 hover:bg-blue-700 transition-colors"
-                    disabled={!chatInput.trim()}
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                    </svg>
-                  </button>
-                </form>
-              </div>
+                </div>
+              )}
             </div>
-          )}
-        </motion.div>
-      </motion.div>
+
+            {/* Input Area */}
+            <div className="p-3 bg-gray-800 border-t border-gray-700">
+              <form onSubmit={handleChatSubmit} className="flex">
+                <input
+                  type="text"
+                  value={chatInput}
+                  onChange={(e) => setChatInput(e.target.value)}
+                  placeholder="Message Jack.AI..."
+                  className="flex-1 bg-gray-700 text-white rounded-l-lg px-4 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                />
+                <button
+                  type="submit"
+                  className="bg-blue-600 text-white rounded-r-lg px-3 hover:bg-blue-700 transition-colors"
+                  disabled={!chatInput.trim()}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                  </svg>
+                </button>
+              </form>
+            </div>
+          </div>
+        </Window>
+      )}
 
       {/* Jack Landis Name Header - Move to top of screen */}
       <motion.div 
