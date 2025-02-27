@@ -499,25 +499,21 @@ const Desktop: React.FC = () => {
     <div 
       className="min-h-screen p-8 relative overflow-hidden"
     >
-      {/* Jack.AI Chat Interface */}
+      {/* Jack.AI Chat Interface - Grok Inspired */}
       <motion.div
         className="fixed z-20"
-        initial={{ opacity: 0, y: 0, x: "-50%" }}
+        initial={{ opacity: 0 }}
         animate={{ 
-          opacity: 1, 
-          y: 0,
+          opacity: 1,
           x: chatPosition.x !== null ? chatPosition.x : "-50%",
           top: chatPosition.y !== null ? chatPosition.y : "1.5rem",
           left: chatPosition.x !== null ? chatPosition.x : "50%",
         }}
         transition={{ 
-          type: "spring", 
-          stiffness: 300, 
-          damping: 25
+          type: "tween", 
+          duration: 0.2
         }}
         drag={chatOpen}
-        dragConstraints={{ left: -600, right: 600, top: -100, bottom: 400 }}
-        dragElastic={0.05}
         dragMomentum={false}
         onDragStart={handleChatDragStart}
         onDragEnd={handleChatDragEnd}
@@ -528,153 +524,106 @@ const Desktop: React.FC = () => {
         }}
       >
         <motion.div 
-          className={`text-white text-opacity-90 bg-black bg-opacity-30 backdrop-blur-sm rounded-xl text-center overflow-hidden transition-all shadow-lg ${
-            isDragging ? 'shadow-blue-500/50' : ''
+          className={`text-white bg-black bg-opacity-70 rounded-xl overflow-hidden shadow-lg ${
+            isDragging ? 'ring-2 ring-blue-500' : ''
           }`}
-          animate={{ 
-            height: chatOpen ? "400px" : "40px",
-            boxShadow: isDragging 
-              ? "0 0 15px 5px rgba(59, 130, 246, 0.5)" 
-              : chatOpen 
-                ? "0 10px 25px rgba(0, 0, 0, 0.2)" 
-                : "0 4px 6px rgba(0, 0, 0, 0.1)"
-          }}
+          layout
           transition={{
-            height: {
-              type: "spring",
-              stiffness: 200,
-              damping: 25
-            },
-            boxShadow: {
-              duration: 0.2
+            layout: {
+              type: "tween",
+              duration: 0.15
             }
           }}
         >
-          {/* Chat Header / Greeting */}
-          <motion.div 
-            ref={chatHeaderRef}
-            className={`px-5 py-2 flex items-center justify-between h-10 border-b border-white border-opacity-10 ${chatOpen ? 'cursor-move' : 'cursor-default'}`}
+          {/* Chat Header */}
+          <div 
+            className={`px-4 py-3 flex items-center justify-between border-b border-gray-700 ${chatOpen ? 'cursor-move' : 'cursor-pointer'}`}
+            onClick={!chatOpen ? () => setChatOpen(true) : undefined}
           >
             <div className="flex items-center">
-              <motion.div
-                className="w-5 h-5 mr-2 rounded-full bg-gradient-to-r from-blue-400 to-purple-500 flex items-center justify-center text-xs font-bold"
-                animate={{ 
-                  scale: isTyping ? [1, 1.2, 1] : 1,
-                  opacity: isTyping ? [0.7, 1, 0.7] : 1
-                }}
-                transition={{ 
-                  repeat: isTyping ? Infinity : 0, 
-                  duration: 1.5 
-                }}
+              <div
+                className={`w-6 h-6 mr-2 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-xs font-bold ${isTyping ? 'animate-pulse' : ''}`}
               >
-                AI
-              </motion.div>
-              <motion.p 
-                className="text-lg font-medium m-0 flex items-center"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.5, delay: 1.0 }}
-              >
-                Jack.AI
-              </motion.p>
+                X
+              </div>
+              <p className="text-base font-medium">Jack.AI</p>
             </div>
             
-            <motion.button
-              className="text-white text-opacity-70 hover:text-opacity-100 focus:outline-none"
-              onClick={() => setChatOpen(!chatOpen)}
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <motion.span
-                animate={{ rotate: chatOpen ? 180 : 0 }}
-                transition={{ duration: 0.3, type: "spring", stiffness: 200 }}
+            {chatOpen && (
+              <button
+                className="text-gray-400 hover:text-white focus:outline-none transition-colors"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setChatOpen(false);
+                }}
               >
-                {chatOpen ? '↑' : '↓'}
-              </motion.span>
-            </motion.button>
-          </motion.div>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414L8.586 8 5.293 4.707a1 1 0 011.414-1.414L10 6.586l3.293-3.293a1 1 0 011.414 1.414L11.414 8l3.293 3.293a1 1 0 010 1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
+            )}
+          </div>
 
           {/* Chat Container */}
-          <AnimatePresence mode="wait">
-            {chatOpen && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "calc(100% - 2.5rem)" }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ 
-                  opacity: { duration: 0.2 },
-                  height: { 
-                    type: "spring", 
-                    stiffness: 200, 
-                    damping: 25 
-                  }
-                }}
-                className="flex flex-col"
+          {chatOpen && (
+            <div className="flex flex-col h-[350px]">
+              {/* Messages Area */}
+              <div 
+                ref={chatContainerRef}
+                className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-900"
               >
-                {/* Messages Area */}
-                <div 
-                  ref={chatContainerRef}
-                  className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin scrollbar-thumb-blue-500 scrollbar-track-transparent"
-                >
-                  {chatMessages.map((msg, idx) => (
-                    <motion.div
-                      key={idx}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.3, delay: idx * 0.1 }}
-                      className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} w-full`}
+                {chatMessages.map((msg, idx) => (
+                  <div
+                    key={idx}
+                    className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} w-full animate-fadeIn`}
+                  >
+                    <div 
+                      className={`max-w-[85%] rounded-2xl px-4 py-2 text-sm ${
+                        msg.role === 'user' 
+                          ? 'bg-blue-600 text-white' 
+                          : 'bg-gray-800 text-gray-100'
+                      }`}
                     >
-                      <div 
-                        className={`max-w-xs rounded-lg px-4 py-2 text-sm ${
-                          msg.role === 'user' 
-                            ? 'bg-blue-500 text-white text-right' 
-                            : 'bg-gray-700 bg-opacity-50 text-white text-left'
-                        }`}
-                      >
-                        {msg.content}
-                      </div>
-                    </motion.div>
-                  ))}
-                  
-                  {/* Typing indicator */}
-                  {isTyping && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="flex justify-start"
-                    >
-                      <div className="bg-gray-700 bg-opacity-50 rounded-lg px-4 py-2 text-white">
-                        <span className="inline-block w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce mr-1"></span>
-                        <span className="inline-block w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce mr-1" style={{ animationDelay: '0.2s' }}></span>
-                        <span className="inline-block w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></span>
-                      </div>
-                    </motion.div>
-                  )}
-                </div>
+                      {msg.content}
+                    </div>
+                  </div>
+                ))}
+                
+                {/* Typing indicator */}
+                {isTyping && (
+                  <div className="flex justify-start w-full">
+                    <div className="bg-gray-800 rounded-2xl px-4 py-2 flex items-center space-x-1">
+                      <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></div>
+                      <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+                      <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+                    </div>
+                  </div>
+                )}
+              </div>
 
-                {/* Input Area */}
-                <div className="p-3 border-t border-white border-opacity-10">
-                  <form onSubmit={handleChatSubmit} className="flex">
-                    <input
-                      type="text"
-                      value={chatInput}
-                      onChange={(e) => setChatInput(e.target.value)}
-                      placeholder="Type a message..."
-                      className="flex-1 bg-gray-700 bg-opacity-50 text-white rounded-l-lg px-4 py-2 focus:outline-none"
-                    />
-                    <button
-                      type="submit"
-                      className="bg-blue-500 text-white rounded-r-lg px-4 hover:bg-blue-600 transition-colors"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                      </svg>
-                    </button>
-                  </form>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+              {/* Input Area */}
+              <div className="p-3 bg-gray-800 border-t border-gray-700">
+                <form onSubmit={handleChatSubmit} className="flex">
+                  <input
+                    type="text"
+                    value={chatInput}
+                    onChange={(e) => setChatInput(e.target.value)}
+                    placeholder="Message Jack.AI..."
+                    className="flex-1 bg-gray-700 text-white rounded-l-lg px-4 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+                  <button
+                    type="submit"
+                    className="bg-blue-600 text-white rounded-r-lg px-3 hover:bg-blue-700 transition-colors"
+                    disabled={!chatInput.trim()}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                    </svg>
+                  </button>
+                </form>
+              </div>
+            </div>
+          )}
         </motion.div>
       </motion.div>
 
@@ -856,6 +805,15 @@ const Desktop: React.FC = () => {
         }
         .scrollbar-thin::-webkit-scrollbar-thumb:hover {
           background-color: rgba(59, 130, 246, 0.7);
+        }
+        
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(5px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animate-fadeIn {
+          animation: fadeIn 0.2s ease-out forwards;
         }
       `}</style>
 
